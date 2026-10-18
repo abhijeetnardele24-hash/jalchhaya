@@ -1,4 +1,6 @@
-import { createPublicClient, str } from "@arkiv-network/sdk";
+import { createPublicClient } from "@arkiv-network/sdk";
+import { str } from "@arkiv-network/sdk/attr";
+import { eq } from "@arkiv-network/sdk/query";
 import { tiramisu } from "@arkiv-network/sdk/chains";
 import { http } from "viem";
 
@@ -22,16 +24,14 @@ async function verifyOnchain() {
     const chainId = await client.getChainId();
     console.log(`[PASS] Verified Chain ID: ${chainId} (Tiramisu Testnet)`);
 
-    console.log("Executing compound query: select().where({ project_id: 'jalchhaya_pune' }).limit(5)...");
+    console.log("Executing compound query: select().where(eq('project_id', str('jalchhaya_pune'))).limit(5)...");
     const result = await client
       .select({
         key: true,
         creator: true,
         expiresAt: true,
       })
-      .where({
-        project_id: str("jalchhaya_pune"),
-      })
+      .where(eq("project_id", str("jalchhaya_pune")))
       .limit(5)
       .fetch();
 

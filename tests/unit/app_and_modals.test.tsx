@@ -158,7 +158,7 @@ describe("App and Modals Comprehensive Test Suite", () => {
       expect(screen.getByText("Hadapsar Gadital Gig-Worker Shade Pavilion")).toBeInTheDocument();
 
       // Refresh button
-      const refreshBtn = screen.getByRole("button", { name: /Refresh relief points from Arkiv/i });
+      const refreshBtn = screen.getByRole("button", { name: "Refresh" });
       fireEvent.click(refreshBtn);
       expect(onRefresh).toHaveBeenCalled();
     });

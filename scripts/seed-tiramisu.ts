@@ -1,9 +1,11 @@
-import { createWalletClient, createPublicClient, str, i32, u64, key, jsonToPayload, ExpirationTime } from "@arkiv-network/sdk";
+import { createWalletClient, createPublicClient, jsonToPayload, ExpirationTime } from "@arkiv-network/sdk";
+import { str } from "@arkiv-network/sdk/attr";
 import { tiramisu } from "@arkiv-network/sdk/chains";
 import { http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import * as dotenv from "dotenv";
-import { INITIAL_SYNTHETIC_POINTS, PROJECT_ID } from "../src/lib/mockData";
+import { INITIAL_SYNTHETIC_POINTS } from "../src/lib/mockData";
+import { PROJECT_ID } from "../src/types/schema";
 
 dotenv.config({ path: ".env.local" });
 dotenv.config();
@@ -57,6 +59,7 @@ async function seedTiramisu() {
 
       const res = await walletClient.createEntity({
         payload: payloadBytes,
+        contentType: "application/json",
         attributes: {
           project_id: str(PROJECT_ID),
           entity_type: str("relief_point"),
