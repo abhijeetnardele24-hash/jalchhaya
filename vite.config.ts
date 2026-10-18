@@ -10,6 +10,15 @@ export default defineConfig({
   },
   build: {
     target: "es2022",
-    sourcemap: true,
+    sourcemap: false, // Security directive: do not leak source maps publicly
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          icons: ["lucide-react"],
+          arkivCore: ["@arkiv-network/sdk", "viem"],
+        },
+      },
+    },
   },
 });

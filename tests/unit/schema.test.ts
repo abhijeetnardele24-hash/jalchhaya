@@ -47,12 +47,16 @@ describe("Schema and Domain Enums", () => {
       address_hint: "Opposite Platform 3",
       amenities: ["Chilled pot water", "Clean glasses"],
       operating_hours: "06:00 - 22:00 IST",
-      synthetic_demo: true as const,
+      synthetic_demo: true,
     };
     expect(ReliefPointPayloadSchema.safeParse(valid).success).toBe(true);
 
-    // Missing synthetic_demo or not true
-    const invalid = { ...valid, synthetic_demo: false };
+    // Live on-chain records can omit synthetic_demo or have false
+    const liveRecord = { ...valid, synthetic_demo: false };
+    expect(ReliefPointPayloadSchema.safeParse(liveRecord).success).toBe(true);
+
+    // Missing required name fails
+    const invalid = { ...valid, name: "" };
     expect(ReliefPointPayloadSchema.safeParse(invalid).success).toBe(false);
   });
 

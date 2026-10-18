@@ -1,0 +1,22 @@
+{
+  "name": "JalChhaya (जलछाया) — Verifiable Heat Relief",
+  "short_name": "JalChhaya",
+  "description": "Verifiable civic heat-relief network for Pune outdoor workers on Arkiv Network.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F5F0E6",
+  "theme_color": "#086F83",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192' fill='%23086F83'><rect width='192' height='192' rx='32' fill='%23132A2E'/><path d='M96 32 C96 32 144 88 144 120 C144 146.5 122.5 168 96 168 C69.5 168 48 146.5 48 120 C48 88 96 32 96 32 Z' fill='%2319A7B8'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%23086F83'><rect width='512' height='512' rx='64' fill='%23132A2E'/><path d='M256 64 C256 64 384 212 384 300 C384 370 326 428 256 428 C186 428 128 370 128 300 C128 212 256 64 256 64 Z' fill='%2319A7B8'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -12,7 +12,9 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "seed": "tsx scripts/seed-tiramisu.ts",
-    "verify-onchain": "tsx scripts/verify-onchain.ts"
+    "verify-onchain": "tsx scripts/verify-onchain.ts",
+    "security-scan": "tsx scripts/security-scan.ts",
+    "audit": "npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {
     "@arkiv-network/sdk": "^0.8.1",

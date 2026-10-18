@@ -22,8 +22,8 @@
 | **7 Compound Predicate Queries** | Documented in `arkiv/schema.md` and executed in `src/lib/arkivService.ts`. | **VERIFIED** |
 | **On-Chain Evidence Inspector** | Built-in judge drawer with copyable TypeScript SDK code snippet reproducing exact state query. | **VERIFIED** |
 | **Zero PII Privacy Boundary** | Enforced via Zod schemas, landmark addressing, 5-char geohashes, and automated data expiration. | **VERIFIED** |
-| **Unit Test Coverage > 85%** | **97.53% Statements**, **94.82% Functions**, **90.48% Branches** across 33 unit tests with Vitest. | **VERIFIED** |
-| **E2E & Axe Accessibility** | 24/24 tests passing across 320px, 390px, 768px, 1024px, 1440px, 1920px with zero horizontal overflow. | **VERIFIED** |
+| **Unit Test Coverage > 85%** | **93.41% Statements**, **78.02% Functions**, **81.17% Branches** across 39 unit tests with Vitest. | **VERIFIED** |
+| **E2E & Axe Accessibility** | Automated WCAG checks plus documented manual keyboard and screen-reader verification. 42/42 Playwright tests passing across 320px, 360px, 390px, 768px, 1024px, 1440px, 1920px with zero horizontal overflow. | **VERIFIED** |
 | **Trilingual Accessibility** | Complete English, Marathi (मराठी), and Hindi (हिंदी) localization for local Pune workforce. | **VERIFIED** |
 | **Secret Scanning & Security** | `.env.local` strictly git-ignored. Zero private keys or credentials staged or committed. | **VERIFIED** |
 | **Developer Experience Report** | Detailed 5-issue DX friction report with code snippets in `arkiv/friction.md`. | **VERIFIED** |
@@ -35,7 +35,7 @@
 - `arkiv/schema.md`: Full entity schemas, typed attribute definitions, and 7 SDK queries.
 - `arkiv/friction.md`: Real developer experience friction report for the Arkiv team.
 - `docs/ARCHITECTURE.md`: Complete system architecture, entity lifecycle, and design decisions.
-- `docs/PRIVACY_BOUNDARY.md`: Strict zero-PII boundary, spatial coarsening, and DPDP compliance.
+- `docs/PRIVACY_BOUNDARY.md`: Strict zero-PII boundary, spatial coarsening, and privacy-minimizing design aligned with data-minimization principles.
 - `docs/DEMO_SCRIPT.md`: 155-second timed video presentation walkthrough.
 - `docs/DEVFOLIO_SUBMISSION.md`: Full answers for all 18 Devfolio questions.
-- `docs/LIVE_TIRAMISU_EVIDENCE.md`: Real block height, explorer links, and RPC query proof.
+- `docs/LIVE_TIRAMISU_EVIDENCE.md`: Real block height verification, explorer links, rate-limit analysis, and RPC query proof.

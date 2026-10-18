@@ -37,7 +37,7 @@ graph TD
 
 ## 3. Four Core Arkiv Entity Contracts
 
-All entities share common indexed attributes: `project_id = "jalchhaya_pune"`, `city = "pune"`, and `zone`.
+All entities share common indexed attributes: `project_id = "jalchhaya-pune-2026"`, `city = "pune"`, and `zone`.
 
 ### 1. `relief_point` (Primary Facility Registry)
 - **Purpose**: Canonical registry of physical water stations, cooling centers, and shaded pavilions in Pune.
@@ -74,31 +74,31 @@ JalChhaya executes all queries directly via `@arkiv-network/sdk`:
 
 1. **Find all active Pune relief points**:
    ```typescript
-   client.select().where({ project_id: str("jalchhaya_pune"), entity_type: str("relief_point") }).limit(50);
+   client.select().where({ project_id: str("jalchhaya-pune-2026"), entity_type: str("relief_point") }).limit(50);
    ```
 2. **Filter by Pune municipal zone (e.g. Swargate)**:
    ```typescript
-   client.select().where({ project_id: str("jalchhaya_pune"), entity_type: str("relief_point"), zone: str("swargate") });
+   client.select().where({ project_id: str("jalchhaya-pune-2026"), entity_type: str("relief_point"), zone: str("swargate") });
    ```
 3. **Filter by resource type (Drinking Water)**:
    ```typescript
-   client.select().where({ project_id: str("jalchhaya_pune"), entity_type: str("relief_point"), resource_type: str("water") });
+   client.select().where({ project_id: str("jalchhaya-pune-2026"), entity_type: str("relief_point"), resource_type: str("water") });
    ```
 4. **Retrieve latest availability observations for a facility**:
    ```typescript
-   client.select().where({ project_id: str("jalchhaya_pune"), entity_type: str("availability_observation"), relief_point_key: key(pointKey) });
+   client.select().where({ project_id: str("jalchhaya-pune-2026"), entity_type: str("availability_observation"), relief_point_key: key(pointKey) });
    ```
 5. **Query high-severity outages**:
    ```typescript
-   client.select().where({ project_id: str("jalchhaya_pune"), entity_type: str("availability_observation"), status: str("unavailable") });
+   client.select().where({ project_id: str("jalchhaya-pune-2026"), entity_type: str("availability_observation"), status: str("unavailable") });
    ```
 6. **Fetch independent verification attestations**:
    ```typescript
-   client.select().where({ project_id: str("jalchhaya_pune"), entity_type: str("attestation"), observation_key: key(obsKey) });
+   client.select().where({ project_id: str("jalchhaya-pune-2026"), entity_type: str("attestation"), observation_key: key(obsKey) });
    ```
 7. **Query active municipal heat emergency alerts**:
    ```typescript
-   client.select().where({ project_id: str("jalchhaya_pune"), entity_type: str("incident"), resolved: i32(0) });
+   client.select().where({ project_id: str("jalchhaya-pune-2026"), entity_type: str("incident"), resolved: i32(0) });
    ```
 
 ---
@@ -106,6 +106,7 @@ JalChhaya executes all queries directly via `@arkiv-network/sdk`:
 ## 5. Security & Privacy Boundary
 
 - **No Personal Identifiable Information (PII)**: Worker names, phone numbers, vehicle registrations, and residential locations are strictly forbidden by Zod validation schemas.
+- **Privacy-Minimizing Design**: Aligned with data-minimization principles of India's Digital Personal Data Protection (DPDP) Act, 2023 without claiming formal legal audit certification.
 - **Safe Landmark Addressing**: Location hints reference well-known public transit nodes (e.g., "Behind Metro Gate 2", "Opposite Platform 3, Deccan Gymkhana").
 - **Immutable Provenance**: The `$creator` attribute permanently ties each report to the signing wallet, disincentivizing spam through verifiable on-chain accountability.
 - **Automatic Stale Data Eviction**: Thanks to Arkiv's native entity expiry, outdated reports expire automatically on-chain without requiring centralized garbage-collection cron jobs.
@@ -115,4 +116,4 @@ JalChhaya executes all queries directly via `@arkiv-network/sdk`:
 ## 6. Accessibility & Localization
 
 - **Trilingual Support**: Instant toggling between English, Marathi (मराठी), and Hindi (हिंदी).
-- **WCAG 2.2 AA Compliance**: Calibrated color tokens, visible focus rings, ARIA roles, live regions for WebSocket feeds, and touch targets >= 44x44px for field workers wearing riding gloves.
+- **Accessibility Verification**: Automated WCAG checks plus documented manual keyboard and screen-reader verification. Calibrated color tokens, visible focus rings, ARIA roles, live regions for WebSocket feeds, and touch targets >= 44x44px for field workers wearing riding gloves.

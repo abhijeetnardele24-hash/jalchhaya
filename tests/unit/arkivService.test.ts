@@ -1,18 +1,20 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
-  fetchReliefPoints,
-  fetchIncidents,
+  fetchReliefPointsWithTruth,
+  fetchIncidentsWithTruth,
   publishAvailabilityObservation,
   publishAttestation,
-  subscribeToArkivEvents,
+  arkivConnectionManager,
+  ensureTiramisuNetwork,
+  calculateRemainingLifetime,
+  ArkivConnectionManager,
 } from "../../src/lib/arkivService";
-
-// Mock SDK methods
-let mockWatchHandlers: any = {};
 
 vi.mock("@arkiv-network/sdk", () => {
   return {
     createPublicClient: vi.fn().mockImplementation(() => ({
+      getBlockNumber: vi.fn().mockResolvedValue(732950n),
+      getEntity: vi.fn().mockResolvedValue({ key: "0x123", attributes: {} }),
       select: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           limit: vi.fn().mockReturnValue({
@@ -20,8 +22,7 @@ vi.mock("@arkiv-network/sdk", () => {
           }),
         }),
       }),
-      watchEntityEvents: vi.fn().mockImplementation((handlers) => {
-        mockWatchHandlers = handlers;
+      watchEntityEvents: vi.fn().mockImplementation(() => {
         return () => {};
       }),
     })),
@@ -40,100 +41,175 @@ vi.mock("@arkiv-network/sdk", () => {
   };
 });
 
-describe("Arkiv Service Layer", () => {
-  it("fetches relief points for all zones and attaches latest observations", async () => {
-    const points = await fetchReliefPoints("all");
-    expect(points.length).toBeGreaterThan(0);
-    const deccanPoint = points.find((p) => p.zone === "deccan");
-    expect(deccanPoint).toBeDefined();
-    expect(deccanPoint?.latestObservation).toBeDefined();
-    expect(deccanPoint?.latestObservation?.status).toBe("available");
+describe("Arkiv Service & Connection State Machine", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it("filters relief points by specific zone", async () => {
-    const swargatePoints = await fetchReliefPoints("swargate");
-    expect(swargatePoints.every((p) => p.zone === "swargate")).toBe(true);
+  it("calculates remaining lifetime correctly across blocks", () => {
+    // Current block 700000, expires at 700010 (20 seconds remaining)
+    expect(calculateRemainingLifetime(700010n, 700000n)).toContain("min remaining");
+    // Current block 700000, expires at 701800 (~1 hour remaining)
+    expect(calculateRemainingLifetime(701800n, 700000n)).toBe("~1h remaining");
+    // Current block 700000, expires at 750000 (~1 day remaining)
+    expect(calculateRemainingLifetime(750000n, 700000n)).toContain("days remaining");
+    // Expired
+    expect(calculateRemainingLifetime(600000n, 700000n)).toBe("Expired");
   });
 
-  it("fetches incidents correctly", async () => {
-    const incidents = await fetchIncidents();
-    expect(incidents.length).toBeGreaterThan(0);
-    expect(incidents[0].zone).toBe("hadapsar");
-    expect(incidents[0].severity).toBeGreaterThanOrEqual(3);
+  it("fetches relief points with explicit source attribution (DEMO fallback on 0 entities)", async () => {
+    const res = await fetchReliefPointsWithTruth("all");
+    expect(res.source).toBe("DEMO");
+    expect(res.data.length).toBeGreaterThan(0);
+    expect(res.data[0].source).toBe("DEMO");
+    expect(res.data[0].statusConfidence).toBeDefined();
+    expect(res.blockNumber).toBe(732950n);
   });
 
-  it("publishes availability observation with calculated expiry and stores locally", async () => {
-    const mockProvider = { request: vi.fn() };
-    const walletAddress = "0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279" as `0x${string}`;
+  it("filters relief points by specific zone in truth query", async () => {
+    const res = await fetchReliefPointsWithTruth("swargate");
+    expect(res.data.every((p) => p.zone === "swargate")).toBe(true);
+  });
 
-    const res = await publishAvailabilityObservation(mockProvider, walletAddress, {
-      reliefPointKey: "0x1111111111111111111111111111111111111111111111111111111111111101",
-      zone: "deccan",
-      resourceType: "water",
-      status: "available",
-      severity: 1,
-      note: "Refreshed test observation",
+  it("forces DEMO mode when explicitly requested", async () => {
+    const res = await fetchReliefPointsWithTruth("deccan", "DEMO");
+    expect(res.source).toBe("DEMO");
+    expect(res.data.every((p) => p.zone === "deccan")).toBe(true);
+  });
+
+  it("fetches incidents with truthful source", async () => {
+    const res = await fetchIncidentsWithTruth("DEMO");
+    expect(res.source).toBe("DEMO");
+    expect(res.data.length).toBeGreaterThan(0);
+    expect(res.data[0].zone).toBe("hadapsar");
+  });
+
+  it("validates wallet network correctly and switches chain if wrong", async () => {
+    // 1. Wrong chain (e.g. Ethereum Mainnet 0x1) -> triggers switch
+    const mockProvider = {
+      request: vi.fn().mockImplementation(({ method }) => {
+        if (method === "eth_chainId") return Promise.resolve("0x1");
+        if (method === "wallet_switchEthereumChain") return Promise.resolve();
+        return Promise.resolve();
+      }),
+    };
+
+    const res = await ensureTiramisuNetwork(mockProvider);
+    expect(res.success).toBe(true);
+    expect(mockProvider.request).toHaveBeenCalledWith({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: "0x761591" }],
     });
-
-    expect(res.entityKey).toBeDefined();
-    expect(res.txHash).toBeDefined();
-
-    // Verify it is merged into points
-    const points = await fetchReliefPoints("deccan");
-    const deccan = points.find((p) => p.key === "0x1111111111111111111111111111111111111111111111111111111111111101");
-    expect(deccan?.latestObservation?.key).toBe(res.entityKey);
   });
 
-  it("publishes outage observation with 4-hour expiry branch", async () => {
-    const mockProvider = { request: vi.fn() };
-    const walletAddress = "0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279" as `0x${string}`;
+  it("handles chain addition when wallet_switchEthereumChain throws 4902", async () => {
+    const mockProvider = {
+      request: vi.fn().mockImplementation(({ method }) => {
+        if (method === "eth_chainId") return Promise.resolve("0x1");
+        if (method === "wallet_switchEthereumChain") {
+          const err: any = new Error("Chain not added");
+          err.code = 4902;
+          return Promise.reject(err);
+        }
+        if (method === "wallet_addEthereumChain") return Promise.resolve();
+        return Promise.resolve();
+      }),
+    };
 
-    const res = await publishAvailabilityObservation(mockProvider, walletAddress, {
-      reliefPointKey: "0x1111111111111111111111111111111111111111111111111111111111111102",
-      zone: "shivajinagar",
-      resourceType: "cooling_centre",
-      status: "unavailable",
-      severity: 5,
-      note: "Facility closed for repair",
-    });
-
-    expect(res.entityKey).toBeDefined();
+    const res = await ensureTiramisuNetwork(mockProvider);
+    expect(res.success).toBe(true);
+    expect(mockProvider.request).toHaveBeenCalledWith(
+      expect.objectContaining({ method: "wallet_addEthereumChain" })
+    );
   });
 
-  it("publishes attestation correctly linked to observation", async () => {
-    const mockProvider = { request: vi.fn() };
-    const walletAddress = "0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279" as `0x${string}`;
+  it("manages connection state transitions deterministically", () => {
+    const manager = new ArkivConnectionManager();
+    const states: string[] = [];
+    const unsub = manager.onStateChange((st) => states.push(st));
 
-    const res = await publishAttestation(mockProvider, walletAddress, {
-      reliefPointKey: "0x1111111111111111111111111111111111111111111111111111111111111101",
-      observationKey: "0x2222222222222222222222222222222222222222222222222222222222222201",
-      verdict: "confirm",
-      reason: "Verified clean flow",
-    });
+    expect(manager.getState()).toBe("connected");
 
-    expect(res.entityKey).toBeDefined();
+    // Simulate disconnect
+    manager.handleDisconnect();
+    expect(manager.getState()).toBe("reconnecting");
+
+    // Clean disconnect
+    manager.disconnect();
+    expect(manager.getState()).toBe("disconnected");
+
+    unsub();
   });
 
-  it("subscribes to live WebSocket events and triggers watcher callbacks", () => {
+  it("subscribes to live WebSocket events and tracks event updates", () => {
     const onEvent = vi.fn();
-    const onError = vi.fn();
-    const unwatch = subscribeToArkivEvents(onEvent, onError);
-    expect(typeof unwatch).toBe("function");
+    const unsub = arkivConnectionManager.onEvent(onEvent);
 
-    // Exercise callbacks
-    mockWatchHandlers.onEntityCreated({ entityKey: "0x123" });
-    expect(onEvent).toHaveBeenCalledWith("EntityCreated", "0x123");
+    // Trigger mock event through connection manager
+    (arkivConnectionManager as any).handleEvent("EntityCreated", "0xtest123");
+    expect(onEvent).toHaveBeenCalledWith("EntityCreated", "0xtest123");
+    expect(arkivConnectionManager.getLastConfirmedEventAt()).toBeInstanceOf(Date);
 
-    mockWatchHandlers.onEntityPatched({ entityKey: "0x456" });
-    expect(onEvent).toHaveBeenCalledWith("EntityPatched", "0x456");
+    unsub();
+  });
 
-    mockWatchHandlers.onExpiryExtended({ entityKey: "0x789" });
-    expect(onEvent).toHaveBeenCalledWith("ExpiryExtended", "0x789");
+  it("publishes availability observation with step updates and post-tx verification", async () => {
+    const steps: string[] = [];
+    const mockProvider = {
+      request: vi.fn().mockImplementation(({ method }) => {
+        if (method === "eth_chainId") return Promise.resolve("0x761591");
+        return Promise.resolve();
+      }),
+    };
+    const walletAddress = "0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279" as `0x${string}`;
 
-    const err = new Error("WS error");
-    mockWatchHandlers.onError(err);
-    expect(onError).toHaveBeenCalledWith(err);
+    const res = await publishAvailabilityObservation(
+      mockProvider,
+      walletAddress,
+      {
+        reliefPointKey: "0x1111111111111111111111111111111111111111111111111111111111111101",
+        zone: "deccan",
+        resourceType: "water",
+        status: "available",
+        severity: 1,
+        note: "Refreshed test observation",
+      },
+      (step) => steps.push(step)
+    );
 
-    unwatch();
+    expect(res.entityKey).toBeDefined();
+    expect(steps).toContain("network_check");
+    expect(steps).toContain("preparing");
+    expect(steps).toContain("prompting_wallet");
+    expect(steps).toContain("broadcasting");
+    expect(steps).toContain("confirming");
+    expect(steps).toContain("querying_arkiv");
+    expect(steps).toContain("confirmed");
+  });
+
+  it("publishes attestation with network verification and confirmed state", async () => {
+    const steps: string[] = [];
+    const mockProvider = {
+      request: vi.fn().mockImplementation(({ method }) => {
+        if (method === "eth_chainId") return Promise.resolve("0x761591");
+        return Promise.resolve();
+      }),
+    };
+    const walletAddress = "0x5b52b2516184Cc635D1A1Bc410697E3a070aa471" as `0x${string}`;
+
+    const res = await publishAttestation(
+      mockProvider,
+      walletAddress,
+      {
+        reliefPointKey: "0x1111111111111111111111111111111111111111111111111111111111111101",
+        observationKey: "0x2222222222222222222222222222222222222222222222222222222222222201",
+        verdict: "confirm",
+        reason: "verified_in_person",
+      },
+      (step) => steps.push(step)
+    );
+
+    expect(res.entityKey).toBeDefined();
+    expect(steps).toContain("confirmed");
   });
 });

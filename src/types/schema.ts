@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const PROJECT_ID = "jalchhaya-pune-2026";
+export const PROJECT_ID = "jalchhaya-pune-2026" as const;
 
 export const PuneZoneEnum = z.enum([
   "all",
@@ -41,7 +41,9 @@ export const IncidentTypeEnum = z.enum([
 ]);
 export type IncidentType = z.infer<typeof IncidentTypeEnum>;
 
-// Payload schemas
+export type DataSourceMode = "LIVE" | "DEMO" | "DEGRADED";
+
+// Payload schemas (allow synthetic_demo to be optional boolean so live on-chain entities parse cleanly)
 export const ReliefPointPayloadSchema = z.object({
   name: z.string().min(1),
   name_mr: z.string().min(1),
@@ -49,7 +51,7 @@ export const ReliefPointPayloadSchema = z.object({
   address_hint: z.string().min(1),
   amenities: z.array(z.string()),
   operating_hours: z.string(),
-  synthetic_demo: z.literal(true),
+  synthetic_demo: z.boolean().optional(),
 });
 export type ReliefPointPayload = z.infer<typeof ReliefPointPayloadSchema>;
 
@@ -57,21 +59,21 @@ export const AvailabilityObservationPayloadSchema = z.object({
   queue_depth_estimate: z.string().optional(),
   water_temperature: z.string().optional(),
   observation_note: z.string().max(200),
-  synthetic_demo: z.literal(true),
+  synthetic_demo: z.boolean().optional(),
 });
 export type AvailabilityObservationPayload = z.infer<typeof AvailabilityObservationPayloadSchema>;
 
 export const AttestationPayloadSchema = z.object({
   reason: z.string().min(1),
   note: z.string().max(200).optional(),
-  synthetic_demo: z.literal(true),
+  synthetic_demo: z.boolean().optional(),
 });
 export type AttestationPayload = z.infer<typeof AttestationPayloadSchema>;
 
 export const IncidentPayloadSchema = z.object({
   headline: z.string().min(1),
   action_guidance: z.string().min(1),
-  synthetic_demo: z.literal(true),
+  synthetic_demo: z.boolean().optional(),
 });
 export type IncidentPayload = z.infer<typeof IncidentPayloadSchema>;
 
@@ -83,7 +85,7 @@ export interface ReliefPoint {
   createdAt: bigint;
   expiresAt: bigint;
   creationFlags?: { readonly: boolean; permissionlessExtension: boolean; raw: number };
-  projectId: string;
+  projectId: typeof PROJECT_ID;
   entityType: "relief_point";
   city: string;
   zone: PuneZone;
@@ -94,6 +96,13 @@ export interface ReliefPoint {
   payload: ReliefPointPayload;
   latestObservation?: AvailabilityObservation;
   attestations?: Attestation[];
+  source: DataSourceMode;
+  confirmCount?: number;
+  challengeCount?: number;
+  statusConfidence?: "high" | "conflicted" | "unverified";
+  expirationBlock?: bigint;
+  remainingLifetimeEst?: string;
+  queryTime?: string;
 }
 
 export interface AvailabilityObservation {
@@ -101,7 +110,7 @@ export interface AvailabilityObservation {
   creator: `0x${string}`;
   createdAt?: bigint;
   expiresAt: bigint;
-  projectId: string;
+  projectId: typeof PROJECT_ID;
   entityType: "availability_observation";
   reliefPointKey: `0x${string}`;
   city: string;
@@ -111,26 +120,30 @@ export interface AvailabilityObservation {
   severity: number; // 1 (normal) to 5 (critical failure)
   observedAt: number; // Unix seconds
   payload: AvailabilityObservationPayload;
+  source: DataSourceMode;
+  confirmCount?: number;
+  challengeCount?: number;
 }
 
 export interface Attestation {
   key: `0x${string}`;
   creator: `0x${string}`;
   expiresAt: bigint;
-  projectId: string;
+  projectId: typeof PROJECT_ID;
   entityType: "attestation";
   reliefPointKey: `0x${string}`;
   observationKey: `0x${string}`;
   verdict: AttestationVerdict;
   observedAt: number;
   payload: AttestationPayload;
+  source: DataSourceMode;
 }
 
 export interface Incident {
   key: `0x${string}`;
   creator: `0x${string}`;
   expiresAt: bigint;
-  projectId: string;
+  projectId: typeof PROJECT_ID;
   entityType: "incident";
   reliefPointKey: `0x${string}`;
   city: string;
@@ -139,4 +152,5 @@ export interface Incident {
   severity: number;
   openedAt: number;
   payload: IncidentPayload;
+  source: DataSourceMode;
 }

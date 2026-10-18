@@ -69,10 +69,10 @@ Forms provide guided buttons (e.g. "Confirmed Usable", "High Wait Time / Crowded
 
 ---
 
-## 5. Compliance with Digital Personal Data Protection (DPDP) Act, 2023
+## 5. Privacy-Minimizing Design Aligned with Data-Minimization Principles (Indian DPDP Act Context)
 
-JalChhaya is designed to comply with the principles of India's Digital Personal Data Protection Act, 2023:
+JalChhaya is architected around a privacy-minimizing design aligned with the data-minimization principles of India's Digital Personal Data Protection (DPDP) Act, 2023 (while noting formal regulatory compliance requires institutional audit):
 1. **Purpose Limitation**: Data collected is strictly limited to municipal facility availability and water infrastructure health.
-2. **Data Minimization**: Only facility status and queue metrics are collected.
-3. **Storage Limitation**: Enforced protocol-level data expiry via Arkiv's native storage lifecycle.
+2. **Data Minimization**: Only facility status and queue metrics are collected; personal identities, names, phone numbers, and home addresses are explicitly prohibited.
+3. **Storage Limitation**: Enforced protocol-level data expiry via Arkiv's native storage lifecycle (1–4 hours for dynamic reports, automatically purged).
 4. **No Profiling**: No individual worker profiling or behavioral analytics exist in the protocol.

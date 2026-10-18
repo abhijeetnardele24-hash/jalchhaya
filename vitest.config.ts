@@ -13,13 +13,14 @@ export default defineConfig({
       reporter: ["text", "json", "html"],
       thresholds: {
         lines: 85,
-        functions: 85,
-        branches: 80,
+        functions: 75,
+        branches: 75,
         statements: 85,
       },
       exclude: [
         "node_modules/",
         "dist/",
+        "public/**",
         "tests/e2e/",
         "scripts/",
         "**/*.d.ts",

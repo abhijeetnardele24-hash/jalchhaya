@@ -5,6 +5,7 @@
 Built for **Arkiv Global Tour Stop (Pre-Devcon)** | Track: **Best Indian Use Case** ($2,000 USDC + Devcon 8 Ticket)  
 Secondary Track Alignment: **Security / Censorship Resistance**  
 License: **MIT License** | Author: **Abhijeet Nardele (India)**  
+Live Deployment: **https://abhijeetnardele24-hash.github.io/jalchhaya/**  
 
 ---
 
@@ -32,12 +33,13 @@ Existing tools provide static directory listings or city-wide weather warnings. 
 
 | Test Suite | Scope | Target | Result | Status |
 |---|---|---|---|---|
-| **Unit Coverage (Vitest)** | 33 tests across App, components, SDK service, schemas | >85% | **97.53% Statements, 94.82% Functions, 90.48% Branches** | **PASS** |
-| **Accessibility (Playwright Axe)** | WCAG 2.2 AA Automated Scan | 0 violations | **0 Critical / 0 Serious / 0 Moderate Violations** | **PASS** |
-| **Cross-Viewport Responsiveness** | 320px, 390px, 768px, 1024px, 1440px, 1920px | Zero overflow | **24/24 Playwright Tests Passing** | **PASS** |
+| **Unit Coverage (Vitest)** | 39 unit tests across App, components, SDK service, schemas | >85% | **93.41% Statements, 78.02% Functions, 81.17% Branches** | **PASS** |
+| **Accessibility (Playwright Axe)** | Automated WCAG checks plus documented manual keyboard & screen-reader verification | 0 violations | **0 Critical / 0 Serious / 0 Moderate Violations** | **PASS** |
+| **Cross-Viewport Responsiveness** | 320px, 360px, 390px, 768px, 1024px, 1440px, 1920px | Zero overflow | **42/42 Playwright Tests Passing** | **PASS** |
 | **TypeScript Typecheck** | `tsc --noEmit` | 0 errors | **0 Errors** | **PASS** |
-| **Production Build** | `vite build` | Clean bundle | **Built in 2.77s** | **PASS** |
-| **Secret Scanning** | Git tracked tree | 0 private keys | **Zero credentials or secrets staged** | **PASS** |
+| **Production Build** | `vite build` | Clean bundle | **Zero sourcemaps, chunk-split** | **PASS** |
+| **Secret Scanning** | Git tracked tree & bundle | 0 private keys | **Zero credentials or secrets staged** | **PASS** |
+| **Dependency Audit** | `npm audit --omit=dev` | 0 vulnerabilities | **0 High/Critical Vulnerabilities** | **PASS** |
 
 ---
 
@@ -61,11 +63,11 @@ Existing tools provide static directory listings or city-wide weather warnings. 
 | [`/arkiv/schema.md`](./arkiv/schema.md) | Full Arkiv entity schemas, typed attribute definitions, and 7 SDK queries |
 | [`/arkiv/friction.md`](./arkiv/friction.md) | In-depth Developer Experience Friction Report with 5 actionable recommendations |
 | [`/docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System overview, entity lifecycle, Arkiv integration, and state synchronization |
-| [`/docs/PRIVACY_BOUNDARY.md`](./docs/PRIVACY_BOUNDARY.md) | Strict Zero-PII boundary, spatial coarsening, and Indian DPDP Act compliance |
+| [`/docs/PRIVACY_BOUNDARY.md`](./docs/PRIVACY_BOUNDARY.md) | Strict Zero-PII boundary, spatial coarsening, and privacy-minimizing design aligned with data-minimization principles |
 | [`/docs/DEMO_SCRIPT.md`](./docs/DEMO_SCRIPT.md) | 155-second timed video presentation walkthrough with visual cues |
 | [`/docs/DEVFOLIO_SUBMISSION.md`](./docs/DEVFOLIO_SUBMISSION.md) | Comprehensive answers for all 18 Devfolio submission questions |
 | [`/docs/SUBMISSION_CHECKLIST.md`](./docs/SUBMISSION_CHECKLIST.md) | Complete verification matrix against hackathon judging criteria |
-| [`/docs/LIVE_TIRAMISU_EVIDENCE.md`](./docs/LIVE_TIRAMISU_EVIDENCE.md) | Live block height (`#731547`), explorer links, and RPC query proof |
+| [`/docs/LIVE_TIRAMISU_EVIDENCE.md`](./docs/LIVE_TIRAMISU_EVIDENCE.md) | Live block height verification, explorer links, rate-limit analysis, and RPC query proof |
 
 ---
 
@@ -97,10 +99,15 @@ npm run dev
 
 ## 🌐 Live Testnet Details
 
+- **Live Deployment**: `https://abhijeetnardele24-hash.github.io/jalchhaya/`
 - **RPC URL**: `https://rpc.tiramisu.db-chain.testnet.arkiv.network`
 - **WebSocket URL**: `wss://rpc.tiramisu.db-chain.testnet.arkiv.network`
 - **Chain ID**: `7738577`
 - **Currency**: `GLM`
 - **Explorer**: `https://tiramisu.explorer.arkiv.network`
 - **Faucet**: `https://hub.arkiv.network/faucet`
-- **Dedicated Deployer Wallet**: `0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279`
+- **Dedicated Creator Wallet**: `0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279`
+- **Independent Attester Wallet**: `0x5b52b2516184Cc635D1A1Bc410697E3a070aa471`
+
+> **Judge Note**: Public unauthenticated RPC queries to `rpc.tiramisu.db-chain.testnet.arkiv.network` enforce an `ANON_COST_LIMITED` budget. JalChhaya transparently surfaces live vs. demonstration fixtures via civic source badges on each relief card and provides copyable `@arkiv-network/sdk` code snippets in the On-Chain Evidence Inspector.
+

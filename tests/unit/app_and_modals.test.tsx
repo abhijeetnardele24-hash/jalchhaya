@@ -28,8 +28,18 @@ describe("App and Modals Comprehensive Test Suite", () => {
 
   describe("App Integration", () => {
     it("renders App, loads points and incidents, and toggles locale and drawer", async () => {
-      const mockFetchPoints = vi.spyOn(arkivService, "fetchReliefPoints").mockResolvedValue(MOCK_POINTS_WITH_OBS);
-      const mockFetchIncidents = vi.spyOn(arkivService, "fetchIncidents").mockResolvedValue(INITIAL_SYNTHETIC_INCIDENTS);
+      const mockFetchPoints = vi.spyOn(arkivService, "fetchReliefPointsWithTruth").mockResolvedValue({
+        data: MOCK_POINTS_WITH_OBS,
+        source: "LIVE",
+        queryTime: "2026-10-18T12:00:00Z",
+        blockNumber: 732920n,
+      });
+      const mockFetchIncidents = vi.spyOn(arkivService, "fetchIncidentsWithTruth").mockResolvedValue({
+        data: INITIAL_SYNTHETIC_INCIDENTS,
+        source: "LIVE",
+        queryTime: "2026-10-18T12:00:00Z",
+        blockNumber: 732920n,
+      });
       vi.spyOn(arkivService, "subscribeToArkivEvents").mockImplementation((cb) => {
         setTimeout(() => cb("EntityCreated", "0x9999999999999999999999999999999999999999"), 10);
         return () => {};
@@ -65,7 +75,7 @@ describe("App and Modals Comprehensive Test Suite", () => {
       // Open on-chain inspector
       const inspectorTrigger = screen.getByText("Arkiv On-Chain Evidence Inspector");
       fireEvent.click(inspectorTrigger);
-      expect(screen.getByText("Exact Reproducible SDK Query")).toBeInTheDocument();
+      expect(await screen.findByText("Exact Reproducible SDK Query")).toBeInTheDocument();
 
       // Close inspector drawer
       const closeBtn = screen.getByLabelText("Close Drawer");
@@ -93,8 +103,18 @@ describe("App and Modals Comprehensive Test Suite", () => {
     });
 
     it("opens and handles Observation and Attestation modals from App flow", async () => {
-      vi.spyOn(arkivService, "fetchReliefPoints").mockResolvedValue(MOCK_POINTS_WITH_OBS);
-      vi.spyOn(arkivService, "fetchIncidents").mockResolvedValue(INITIAL_SYNTHETIC_INCIDENTS);
+      vi.spyOn(arkivService, "fetchReliefPointsWithTruth").mockResolvedValue({
+        data: MOCK_POINTS_WITH_OBS,
+        source: "LIVE",
+        queryTime: "2026-10-18T12:00:00Z",
+        blockNumber: 732920n,
+      });
+      vi.spyOn(arkivService, "fetchIncidentsWithTruth").mockResolvedValue({
+        data: INITIAL_SYNTHETIC_INCIDENTS,
+        source: "LIVE",
+        queryTime: "2026-10-18T12:00:00Z",
+        blockNumber: 732920n,
+      });
       vi.spyOn(arkivService, "subscribeToArkivEvents").mockReturnValue(() => {});
 
       render(<App />);
@@ -104,7 +124,7 @@ describe("App and Modals Comprehensive Test Suite", () => {
       fireEvent.click(reportButtons[0]);
 
       // Check observation modal opened
-      expect(screen.getByText("Publish Availability Observation")).toBeInTheDocument();
+      expect(await screen.findByRole("heading", { name: "Update Status" })).toBeInTheDocument();
       const cancelObsBtn = screen.getByText("Cancel");
       fireEvent.click(cancelObsBtn);
 
@@ -113,7 +133,7 @@ describe("App and Modals Comprehensive Test Suite", () => {
       expect(verifyButtons.length).toBeGreaterThan(0);
       fireEvent.click(verifyButtons[0]);
 
-      expect(screen.getByText("Submit Independent Attestation")).toBeInTheDocument();
+      expect(await screen.findByRole("heading", { name: "Confirm / Challenge" })).toBeInTheDocument();
       const cancelAttestBtn = screen.getByText("Cancel");
       fireEvent.click(cancelAttestBtn);
     });
@@ -181,7 +201,7 @@ describe("App and Modals Comprehensive Test Suite", () => {
         />
       );
 
-      expect(screen.queryByText("Publish Availability Observation")).not.toBeInTheDocument();
+      expect(screen.queryByText("Update Status")).not.toBeInTheDocument();
 
       // Open with no wallet
       rerender(
@@ -195,11 +215,10 @@ describe("App and Modals Comprehensive Test Suite", () => {
         />
       );
 
-      expect(screen.getByText("Publish Availability Observation")).toBeInTheDocument();
+      expect(screen.getByText("Update Status")).toBeInTheDocument();
       const submitBtn = screen.getByRole("button", { name: /Sign & Publish to Arkiv/i });
       fireEvent.click(submitBtn);
-
-      expect(screen.getByText(/Please install an EVM wallet/)).toBeInTheDocument();
+      expect(screen.getByText(/Please install an EVM wallet/i)).toBeInTheDocument();
 
       // Open with connected wallet and simulate success
       const mockPublish = vi.spyOn(arkivService, "publishAvailabilityObservation").mockResolvedValue({
@@ -223,22 +242,25 @@ describe("App and Modals Comprehensive Test Suite", () => {
       const crowdedBtn = screen.getByRole("button", { name: "High Wait Time / Crowded" });
       fireEvent.click(crowdedBtn);
 
-      const queueInput = screen.getByPlaceholderText(/e.g. 5-10 people/i);
+      const queueInput = screen.getByPlaceholderText(/e.g. 5 people, no wait/i);
       fireEvent.change(queueInput, { target: { value: "2 people" } });
 
-      const tempInput = screen.getByPlaceholderText(/e.g. Chilled \/ Working/i);
+      const tempInput = screen.getByPlaceholderText(/e.g. Cold pot water, ambient tap/i);
       fireEvent.change(tempInput, { target: { value: "Chilled" } });
 
-      const noteInput = screen.getByPlaceholderText(/Observation notes/i);
+      const noteInput = screen.getByPlaceholderText(/e.g. In-person observation from field worker/i);
       fireEvent.change(noteInput, { target: { value: "Refilled 10 mins ago" } });
 
       fireEvent.click(submitBtn);
 
-      await waitFor(() => {
-        expect(mockPublish).toHaveBeenCalled();
-        expect(onSuccess).toHaveBeenCalled();
-        expect(onClose).toHaveBeenCalled();
-      });
+      await waitFor(
+        () => {
+          expect(mockPublish).toHaveBeenCalled();
+          expect(onSuccess).toHaveBeenCalled();
+          expect(onClose).toHaveBeenCalled();
+        },
+        { timeout: 3000 }
+      );
     });
 
     it("displays error message if publication fails", async () => {
@@ -293,24 +315,27 @@ describe("App and Modals Comprehensive Test Suite", () => {
         />
       );
 
-      expect(screen.getByText("Submit Independent Attestation")).toBeInTheDocument();
-      expect(screen.getByText(/Target Observation by/)).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Confirm / Challenge" })).toBeInTheDocument();
+      expect(screen.getByText(/Attesting to report by/)).toBeInTheDocument();
 
       // Switch to challenge
-      const challengeRadio = screen.getByRole("radio", { name: /Challenge \(I dispute this observation\)/i });
-      fireEvent.click(challengeRadio);
+      const challengeBtn = screen.getByRole("button", { name: /Challenge/i });
+      fireEvent.click(challengeBtn);
 
-      const reasonInput = screen.getByPlaceholderText(/e.g. Verified drinking water flow at 13:30 IST/i);
-      fireEvent.change(reasonInput, { target: { value: "Water tap is dry" } });
+      const noteInput = screen.getByPlaceholderText(/e.g. In-person verification during delivery shift/i);
+      fireEvent.change(noteInput, { target: { value: "Water tap is dry" } });
 
       const submitBtn = screen.getByRole("button", { name: /Sign & Attest/i });
       fireEvent.click(submitBtn);
 
-      await waitFor(() => {
-        expect(mockAttest).toHaveBeenCalled();
-        expect(onSuccess).toHaveBeenCalled();
-        expect(onClose).toHaveBeenCalled();
-      });
+      await waitFor(
+        () => {
+          expect(mockAttest).toHaveBeenCalled();
+          expect(onSuccess).toHaveBeenCalled();
+          expect(onClose).toHaveBeenCalled();
+        },
+        { timeout: 3000 }
+      );
     });
 
     it("displays error message if attestation publication fails", async () => {
@@ -360,7 +385,7 @@ describe("App and Modals Comprehensive Test Suite", () => {
         />
       );
 
-      const copyBtn = screen.getByRole("button", { name: /Copy Query Code/i });
+      const copyBtn = screen.getByRole("button", { name: /Copy Snippet/i });
       fireEvent.click(copyBtn);
 
       await waitFor(() => {

@@ -51,6 +51,5 @@
 ### [02:15 – 02:35] Scene 5: Censorship Resistance & The Winning Impact
 - **Visual**: Show the full dashboard running against live Arkiv Tiramisu (`Chain ID: 7738577`), showcasing the open-source GitHub repository and passing test suite.
 - **Voiceover**:
-  > *"JalChhaya turns Arkiv's core innovations—typed compound filtering, entity expiration, lifetime extension, and creator provenance—into an essential public safety utility for India's outdoor workforce.*  
-  > *It is 100% open source under the MIT License, tested to 97% code coverage, audited for WCAG 2.2 AA accessibility, and deployed live on Arkiv Tiramisu testnet.*  
+  > *It is 100% open source under the MIT License, tested across comprehensive unit and end-to-end suites, verified via automated WCAG checks plus documented manual keyboard and screen-reader testing, and deployed live on GitHub Pages and Arkiv Tiramisu testnet.*  
   > *Thank you, and stay cool with JalChhaya."*

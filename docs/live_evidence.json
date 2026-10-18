@@ -1,0 +1,24 @@
+{
+  "network": {
+    "chainId": 7738577,
+    "chainName": "Arkiv Tiramisu Testnet",
+    "rpcUrl": "https://rpc.tiramisu.db-chain.testnet.arkiv.network",
+    "wsUrl": "wss://rpc.tiramisu.db-chain.testnet.arkiv.network",
+    "explorerUrl": "https://explorer.tiramisu.db-chain.testnet.arkiv.network",
+    "verifiedBlockHeight": "733989",
+    "verifiedAt": "2026-10-18T10:01:52.148Z"
+  },
+  "projectId": "jalchhaya-pune-2026",
+  "wallets": {
+    "creator": "0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279",
+    "attester": "0x5b52b2516184Cc635D1A1Bc410697E3a070aa471"
+  },
+  "entities": {
+    "reliefPoints": [],
+    "observations": [],
+    "attestations": [],
+    "incidents": []
+  },
+  "onchainVerified": false,
+  "statusMessage": "Query failed / rate-limited: HTTP request failed.\n\nStatus: 429\nURL: https://rpc.tiramisu.db-chain.testnet.arkiv.network/\nRequest body: {\"method\":\"arkiv_query\",\"params\":[\"project_id = str('jalchhaya-pune-2026')\",{\"select\":{\"key\":true,\"owner\":false,\"creator\":true,\"createdAt\":false,\"updatedAt\":false,\"expiresAt\":true,\"creationFlags\":false,\"contentType\":false,\"payload\":false,\"attributeSchema\":false,\"attributes\":false},\"limit\":\"0x14\"}]}\n\nDetails: \"ANON_COST_LIMITED\"\nVersion: viem@2.57.7. Fund wallets at https://hub.arkiv.network/faucet to broadcast."
+}

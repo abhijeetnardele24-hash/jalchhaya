@@ -1,6 +1,8 @@
 import React from "react";
 import { Locale, translations } from "../i18n/translations";
-import { ShieldCheck, Database, Globe, Wallet } from "lucide-react";
+import { Database, Globe, Wallet, AlertCircle, RefreshCw } from "lucide-react";
+import { ConnectionState } from "../lib/arkivService";
+import { DataSourceMode } from "../types/schema";
 
 interface HeaderProps {
   locale: Locale;
@@ -9,6 +11,10 @@ interface HeaderProps {
   onConnectWallet: () => void;
   onDisconnectWallet: () => void;
   onOpenEvidence: () => void;
+  connectionState: ConnectionState;
+  lastEventAt: Date | null;
+  dataSourceMode: DataSourceMode;
+  onToggleDataMode: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -18,24 +24,59 @@ export const Header: React.FC<HeaderProps> = ({
   onConnectWallet,
   onDisconnectWallet,
   onOpenEvidence,
+  connectionState,
+  lastEventAt,
+  dataSourceMode,
+  onToggleDataMode,
 }) => {
   const t = translations[locale];
+
+  const getConnectionDotColor = () => {
+    switch (connectionState) {
+      case "connected":
+        return "var(--c-leaf)";
+      case "reconnecting":
+      case "connecting":
+        return "var(--c-sun)";
+      case "degraded":
+        return "#718285";
+      case "disconnected":
+      default:
+        return "var(--c-heat)";
+    }
+  };
+
+  const getConnectionLabel = () => {
+    switch (connectionState) {
+      case "connected":
+        return "Arkiv WS: Connected";
+      case "connecting":
+        return "Arkiv WS: Connecting…";
+      case "reconnecting":
+        return "Arkiv WS: Reconnecting…";
+      case "degraded":
+        return "Arkiv: RPC Degraded";
+      case "disconnected":
+      default:
+        return "Arkiv: Disconnected";
+    }
+  };
 
   return (
     <header
       style={{
-        borderBottom: "1px solid var(--border-main)",
-        backgroundColor: "var(--bg-card)",
+        borderBottom: "1px solid var(--c-border)",
+        backgroundColor: "var(--c-paper)",
         paddingTop: "0.75rem",
         paddingBottom: "0.75rem",
         position: "sticky",
         top: 0,
-        zIndex: 30,
-        boxShadow: "var(--shadow-sm)",
+        zIndex: 40,
+        boxShadow: "var(--shadow-subtle)",
       }}
     >
       <div className="container">
-        {/* Top bar: Brand + Badges + Controls */}
+        {/* Top Header Row */}
         <div
           style={{
             display: "flex",
@@ -45,20 +86,21 @@ export const Header: React.FC<HeaderProps> = ({
             gap: "0.75rem",
           }}
         >
-          {/* Brand and Track Info */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
+          {/* Brand & Civic Identity */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <div
               style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "6px",
-                backgroundColor: "var(--color-water)",
+                width: "40px",
+                height: "40px",
+                borderRadius: "4px",
+                backgroundColor: "var(--c-monsoon)",
                 color: "#FFFFFF",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontWeight: 900,
                 fontSize: "1.125rem",
+                boxShadow: "0 1px 3px rgba(8, 111, 131, 0.3)",
               }}
               aria-hidden="true"
             >
@@ -66,55 +108,75 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             <div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
-                <h1 style={{ fontSize: "1.25rem", fontWeight: 800, letterSpacing: "-0.02em" }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", flexWrap: "wrap" }}>
+                <h1 style={{ fontSize: "1.25rem", fontWeight: 800, letterSpacing: "-0.02em", color: "var(--c-deep-ink)" }}>
                   {t.appName}
                 </h1>
                 <span
                   style={{
-                    fontSize: "0.75rem",
+                    fontSize: "0.6875rem",
                     fontWeight: 700,
-                    color: "var(--color-water)",
-                    letterSpacing: "0.04em",
+                    color: "var(--c-monsoon)",
+                    letterSpacing: "0.05em",
                     textTransform: "uppercase",
+                    backgroundColor: "var(--c-water-subtle)",
+                    padding: "0.125rem 0.375rem",
+                    borderRadius: "3px",
                   }}
                 >
-                  Pune Live
+                  Pune Civic Field Grid
                 </span>
               </div>
-              <p style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+              <p style={{ fontSize: "0.75rem", color: "var(--c-text-muted)" }}>
                 {t.appTagline}
               </p>
             </div>
           </div>
 
-          {/* Action and Configuration Controls */}
+          {/* Action & Configuration Controls */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-            {/* Network pill */}
+            {/* Live vs Demo Toggle Switch */}
+            <button
+              onClick={onToggleDataMode}
+              className="btn-secondary"
+              title="Click to toggle between live on-chain Arkiv data and synthetic demo scenario"
+              style={{
+                fontSize: "0.75rem",
+                padding: "0.35rem 0.625rem",
+              }}
+            >
+              <RefreshCw size={13} aria-hidden="true" />
+              <span>Mode: </span>
+              <strong style={{ color: dataSourceMode === "LIVE" ? "var(--c-leaf)" : "#8C560A" }}>
+                {dataSourceMode}
+              </strong>
+            </button>
+
+            {/* Network State Machine Indicator */}
             <div
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "0.375rem",
-                padding: "0.25rem 0.625rem",
-                backgroundColor: "var(--bg-subtle)",
+                padding: "0.35rem 0.625rem",
+                backgroundColor: "var(--c-sand-subtle)",
                 borderRadius: "4px",
-                border: "1px solid var(--border-main)",
+                border: "1px solid var(--c-border)",
                 fontSize: "0.75rem",
                 fontWeight: 600,
               }}
-              title="Connected to Arkiv Tiramisu Testnet"
+              title={lastEventAt ? `Last confirmed event at ${lastEventAt.toLocaleTimeString()}` : "Arkiv Tiramisu Network (Chain ID: 7738577)"}
             >
               <span
                 style={{
                   width: "8px",
                   height: "8px",
                   borderRadius: "50%",
-                  backgroundColor: "var(--color-sage)",
+                  backgroundColor: getConnectionDotColor(),
                   display: "inline-block",
                 }}
               />
-              <span className="mono">{t.networkBadge}</span>
+              <span className="mono">{getConnectionLabel()}</span>
             </div>
 
             {/* Language Selector */}
@@ -122,23 +184,25 @@ export const Header: React.FC<HeaderProps> = ({
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                border: "1px solid var(--border-strong)",
+                border: "1px solid var(--c-border-strong)",
                 borderRadius: "4px",
                 overflow: "hidden",
+                backgroundColor: "var(--c-paper)",
               }}
               role="group"
               aria-label="Language Selector"
             >
               <span style={{ padding: "0 0.375rem", display: "flex", alignItems: "center" }} aria-hidden="true">
-                <Globe size={14} color="var(--text-muted)" />
+                <Globe size={13} color="var(--c-text-muted)" />
               </span>
               <button
                 onClick={() => onLocaleChange("en")}
                 style={{
-                  padding: "0.25rem 0.5rem",
+                  padding: "0.35rem 0.5rem",
                   fontSize: "0.75rem",
                   fontWeight: locale === "en" ? 700 : 500,
-                  backgroundColor: locale === "en" ? "var(--bg-muted)" : "transparent",
+                  backgroundColor: locale === "en" ? "var(--c-sand)" : "transparent",
+                  color: "var(--c-deep-ink)",
                   border: "none",
                   cursor: "pointer",
                 }}
@@ -149,10 +213,11 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={() => onLocaleChange("mr")}
                 style={{
-                  padding: "0.25rem 0.5rem",
+                  padding: "0.35rem 0.5rem",
                   fontSize: "0.75rem",
                   fontWeight: locale === "mr" ? 700 : 500,
-                  backgroundColor: locale === "mr" ? "var(--bg-muted)" : "transparent",
+                  backgroundColor: locale === "mr" ? "var(--c-sand)" : "transparent",
+                  color: "var(--c-deep-ink)",
                   border: "none",
                   cursor: "pointer",
                 }}
@@ -163,10 +228,11 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={() => onLocaleChange("hi")}
                 style={{
-                  padding: "0.25rem 0.5rem",
+                  padding: "0.35rem 0.5rem",
                   fontSize: "0.75rem",
                   fontWeight: locale === "hi" ? 700 : 500,
-                  backgroundColor: locale === "hi" ? "var(--bg-muted)" : "transparent",
+                  backgroundColor: locale === "hi" ? "var(--c-sand)" : "transparent",
+                  color: "var(--c-deep-ink)",
                   border: "none",
                   cursor: "pointer",
                 }}
@@ -176,23 +242,13 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
 
-            {/* Judge Evidence Drawer Button */}
+            {/* Evidence Inspector Button */}
             <button
               onClick={onOpenEvidence}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.375rem",
-                padding: "0.375rem 0.75rem",
-                borderRadius: "4px",
-                border: "1px solid var(--border-strong)",
-                backgroundColor: "var(--bg-canvas)",
-                fontSize: "0.8125rem",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
+              className="btn-secondary"
+              style={{ fontSize: "0.75rem", padding: "0.35rem 0.625rem" }}
             >
-              <Database size={15} color="var(--color-water)" />
+              <Database size={13} color="var(--c-monsoon)" aria-hidden="true" />
               <span>{t.evidenceInspector.title}</span>
             </button>
 
@@ -203,9 +259,10 @@ export const Header: React.FC<HeaderProps> = ({
                   className="mono"
                   style={{
                     fontSize: "0.75rem",
-                    padding: "0.375rem 0.625rem",
-                    backgroundColor: "var(--color-sage-subtle)",
-                    color: "var(--color-sage)",
+                    padding: "0.35rem 0.625rem",
+                    backgroundColor: "var(--c-leaf-subtle)",
+                    color: "var(--c-leaf)",
+                    border: "1px solid rgba(56, 122, 98, 0.25)",
                     borderRadius: "4px",
                     fontWeight: 600,
                   }}
@@ -215,14 +272,8 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
                 <button
                   onClick={onDisconnectWallet}
-                  style={{
-                    fontSize: "0.75rem",
-                    padding: "0.375rem 0.5rem",
-                    border: "1px solid var(--border-strong)",
-                    borderRadius: "4px",
-                    backgroundColor: "transparent",
-                    cursor: "pointer",
-                  }}
+                  className="btn-secondary"
+                  style={{ fontSize: "0.75rem", padding: "0.35rem 0.5rem" }}
                 >
                   {t.disconnectWallet}
                 </button>
@@ -230,44 +281,45 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <button
                 onClick={onConnectWallet}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.375rem",
-                  padding: "0.375rem 0.75rem",
-                  borderRadius: "4px",
-                  border: "1px solid var(--color-water)",
-                  backgroundColor: "var(--color-water)",
-                  color: "#FFFFFF",
-                  fontSize: "0.8125rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
+                className="btn-primary"
+                style={{ fontSize: "0.75rem", padding: "0.35rem 0.75rem" }}
               >
-                <Wallet size={15} />
+                <Wallet size={13} aria-hidden="true" />
                 <span>{t.connectWallet}</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* Synthetic Demo Banner Notice */}
+        {/* Data Source Truth Banner */}
         <div
           style={{
             marginTop: "0.5rem",
             padding: "0.25rem 0.5rem",
             borderRadius: "4px",
-            backgroundColor: "var(--color-amber-subtle)",
-            color: "var(--color-amber)",
-            fontSize: "0.75rem",
+            backgroundColor: dataSourceMode === "LIVE" ? "var(--c-leaf-subtle)" : "var(--c-sun-subtle)",
+            color: dataSourceMode === "LIVE" ? "var(--c-leaf)" : "#8C560A",
+            fontSize: "0.6875rem",
             fontWeight: 600,
             display: "flex",
             alignItems: "center",
-            gap: "0.375rem",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "0.5rem",
+            border: `1px solid ${dataSourceMode === "LIVE" ? "rgba(56, 122, 98, 0.25)" : "rgba(233, 162, 59, 0.35)"}`,
           }}
         >
-          <ShieldCheck size={14} />
-          <span>{t.syntheticNotice}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+            <AlertCircle size={13} aria-hidden="true" />
+            <span>
+              {dataSourceMode === "LIVE"
+                ? "Live Verified Mode · Displaying genuine records fetched directly from Arkiv Tiramisu on-chain index."
+                : "Demonstration Scenario · Labelled synthetic baseline for hackathon evaluation and disconnected environments."}
+            </span>
+          </div>
+          <span className="mono" style={{ fontSize: "0.625rem" }}>
+            Chain ID: 7738577
+          </span>
         </div>
       </div>
     </header>

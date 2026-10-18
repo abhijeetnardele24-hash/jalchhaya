@@ -1,33 +1,35 @@
 import React from "react";
-import { PuneZone } from "../types/schema";
+import { PuneZone, ReliefPoint } from "../types/schema";
 import { Locale, translations } from "../i18n/translations";
-import { MapPin } from "lucide-react";
+import { Navigation } from "lucide-react";
 
 interface ZoneMapProps {
   selectedZone: PuneZone;
   onSelectZone: (zone: PuneZone) => void;
   locale: Locale;
   pointCounts: Record<PuneZone, number>;
+  selectedPoint?: ReliefPoint | null;
 }
 
 interface ZoneInfo {
   id: PuneZone;
   labelEn: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
+  labelMr: string;
+  labelHi: string;
+  landmark: string;
+  heatIndex: string;
+  accent: string;
 }
 
-const ZONES_LAYOUT: ZoneInfo[] = [
-  { id: "hinjawadi", labelEn: "Hinjawadi", x: 30, y: 30, w: 140, h: 65 },
-  { id: "shivajinagar", labelEn: "Shivajinagar", x: 190, y: 40, w: 150, h: 70 },
-  { id: "yerawada", labelEn: "Yerawada", x: 360, y: 35, w: 140, h: 65 },
-  { id: "kothrud", labelEn: "Kothrud", x: 40, y: 120, w: 130, h: 70 },
-  { id: "deccan", labelEn: "Deccan Gymkhana", x: 190, y: 130, w: 150, h: 70 },
-  { id: "hadapsar", labelEn: "Hadapsar", x: 360, y: 125, w: 140, h: 75 },
-  { id: "swargate", labelEn: "Swargate", x: 190, y: 220, w: 150, h: 70 },
-  { id: "katraj", labelEn: "Katraj", x: 190, y: 310, w: 150, h: 65 },
+const PUNE_ATLAS_ZONES: ZoneInfo[] = [
+  { id: "hinjawadi", labelEn: "Hinjawadi", labelMr: "हिंजवडी", labelHi: "हिंजवड़ी", landmark: "IT Hub / Shivaji Chowk", heatIndex: "39.2°C", accent: "var(--c-monsoon)" },
+  { id: "shivajinagar", labelEn: "Shivajinagar", labelMr: "शिवाजीनगर", labelHi: "शिवाजीनगर", landmark: "Metro / Station Hub", heatIndex: "40.1°C", accent: "var(--c-monsoon)" },
+  { id: "yerawada", labelEn: "Yerawada", labelMr: "येरवडा", labelHi: "यरवडा", landmark: "Ahmednagar Rd Corridor", heatIndex: "40.4°C", accent: "var(--c-monsoon)" },
+  { id: "kothrud", labelEn: "Kothrud", labelMr: "कोथरूड", labelHi: "कोथरुड", landmark: "Karve Rd / Depot", heatIndex: "38.9°C", accent: "var(--c-leaf)" },
+  { id: "deccan", labelEn: "Deccan Gymkhana", labelMr: "डेक्कन", labelHi: "डेक्कन", landmark: "PMT Bus Terminal Circle", heatIndex: "40.2°C", accent: "var(--c-monsoon)" },
+  { id: "hadapsar", labelEn: "Hadapsar", labelMr: "हडपसर", labelHi: "हड़पसर", landmark: "Gadital Gig Worker Junction", heatIndex: "41.8°C", accent: "var(--c-heat)" },
+  { id: "swargate", labelEn: "Swargate", labelMr: "स्वारगेट", labelHi: "स्वारगेट", landmark: "MSRTC State Transport Depot", heatIndex: "41.2°C", accent: "var(--c-heat)" },
+  { id: "katraj", labelEn: "Katraj", labelMr: "कात्रज", labelHi: "कातरज", landmark: "Southern Ghat Entrance", heatIndex: "39.5°C", accent: "var(--c-leaf)" },
 ];
 
 export const ZoneMap: React.FC<ZoneMapProps> = ({
@@ -35,48 +37,56 @@ export const ZoneMap: React.FC<ZoneMapProps> = ({
   onSelectZone,
   locale,
   pointCounts,
+  selectedPoint,
 }) => {
   const t = translations[locale];
 
   return (
     <div
+      className="civic-card"
       style={{
-        backgroundColor: "var(--bg-card)",
-        border: "1px solid var(--border-main)",
-        borderRadius: "8px",
-        padding: "1rem",
-        marginBottom: "1.5rem",
-        boxShadow: "var(--shadow-sm)",
+        padding: "1.25rem",
+        marginBottom: "1.25rem",
+        display: "flex",
+        flexDirection: "column",
+        gap: "1rem",
       }}
     >
+      {/* Atlas Header */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "0.75rem",
           flexWrap: "wrap",
           gap: "0.5rem",
+          borderBottom: "1px solid var(--c-border)",
+          paddingBottom: "0.75rem",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <MapPin size={18} color="var(--color-water)" />
-          <h2 style={{ fontSize: "1rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            {locale === "mr" ? "पुणे परिसर दिलासा नकाशा" : locale === "hi" ? "पुणे क्षेत्र राहत नक्शा" : "Pune Municipal Zone Grid"}
-          </h2>
+          <Navigation size={18} color="var(--c-monsoon)" aria-hidden="true" />
+          <div>
+            <h2 style={{ fontSize: "0.9375rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--c-deep-ink)" }}>
+              {locale === "mr" ? "पुणे नागरी दिलासा नकाशा (Atlas)" : locale === "hi" ? "पुणे नागरिक राहत एटलस (Atlas)" : "Pune Civic Heat-Relief Atlas"}
+            </h2>
+            <p style={{ fontSize: "0.6875rem", color: "var(--c-text-muted)" }}>
+              Geohash-5 bounded transit hubs and municipal micro-climate stations
+            </p>
+          </div>
         </div>
 
+        {/* All Zones Reset Button */}
         <button
           onClick={() => onSelectZone("all")}
+          className="btn-secondary"
           style={{
-            fontSize: "0.8125rem",
-            padding: "0.25rem 0.625rem",
-            borderRadius: "4px",
-            border: selectedZone === "all" ? "1px solid var(--color-water)" : "1px solid var(--border-strong)",
-            backgroundColor: selectedZone === "all" ? "var(--color-water-subtle)" : "transparent",
-            color: selectedZone === "all" ? "var(--color-water)" : "var(--text-muted)",
-            fontWeight: 600,
-            cursor: "pointer",
+            fontSize: "0.75rem",
+            padding: "0.35rem 0.625rem",
+            backgroundColor: selectedZone === "all" ? "var(--c-sand)" : "transparent",
+            borderColor: selectedZone === "all" ? "var(--c-monsoon)" : "var(--c-border-strong)",
+            color: selectedZone === "all" ? "var(--c-monsoon)" : "var(--c-deep-ink)",
+            fontWeight: selectedZone === "all" ? 800 : 600,
           }}
           aria-pressed={selectedZone === "all"}
         >
@@ -84,17 +94,20 @@ export const ZoneMap: React.FC<ZoneMapProps> = ({
         </button>
       </div>
 
+      {/* Spatial Schematic Grid (Simulating Geographic Layout of Pune) */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 150px), 1fr))",
           gap: "0.625rem",
         }}
+        role="region"
+        aria-label="Pune Zone Geographic Selector"
       >
-        {ZONES_LAYOUT.map((z) => {
+        {PUNE_ATLAS_ZONES.map((z) => {
           const isSelected = selectedZone === z.id;
           const count = pointCounts[z.id] || 0;
-          const label = t.zones[z.id] || z.labelEn;
+          const label = locale === "mr" ? z.labelMr : locale === "hi" ? z.labelHi : z.labelEn;
 
           return (
             <button
@@ -105,47 +118,90 @@ export const ZoneMap: React.FC<ZoneMapProps> = ({
                 flexDirection: "column",
                 alignItems: "flex-start",
                 padding: "0.75rem",
-                borderRadius: "6px",
-                border: isSelected ? "2px solid var(--color-water)" : "1px solid var(--border-main)",
-                backgroundColor: isSelected ? "var(--color-water-subtle)" : "var(--bg-canvas)",
+                borderRadius: "4px",
+                border: isSelected ? "2px solid var(--c-monsoon)" : "1px solid var(--c-border)",
+                backgroundColor: isSelected ? "var(--c-water-subtle)" : "var(--c-paper)",
                 cursor: "pointer",
                 textAlign: "left",
-                transition: "border-color 0.15s ease",
+                transition: "all var(--motion-duration) var(--motion-easing)",
+                boxShadow: isSelected ? "0 2px 6px rgba(8, 111, 131, 0.15)" : "none",
               }}
               aria-pressed={isSelected}
             >
-              <span style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--text-ink)" }}>
-                {label}
+              <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "baseline" }}>
+                <span style={{ fontSize: "0.875rem", fontWeight: 800, color: "var(--c-deep-ink)" }}>
+                  {label}
+                </span>
+                <span
+                  className="mono tabular-nums"
+                  style={{
+                    fontSize: "0.625rem",
+                    padding: "0.1rem 0.3rem",
+                    borderRadius: "2px",
+                    fontWeight: 700,
+                    backgroundColor: z.id === "hadapsar" || z.id === "swargate" ? "var(--c-heat-subtle)" : "var(--c-sand-subtle)",
+                    color: z.id === "hadapsar" || z.id === "swargate" ? "#9E261B" : "var(--c-text-secondary)",
+                  }}
+                  title="Zone peak ambient heat index"
+                >
+                  {z.heatIndex}
+                </span>
+              </div>
+
+              <span style={{ fontSize: "0.6875rem", color: "var(--c-text-muted)", marginTop: "0.2rem", lineHeight: 1.2 }}>
+                {z.landmark}
               </span>
+
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   width: "100%",
-                  marginTop: "0.25rem",
-                  fontSize: "0.75rem",
-                  color: "var(--text-muted)",
+                  marginTop: "0.5rem",
+                  fontSize: "0.6875rem",
+                  color: isSelected ? "var(--c-monsoon)" : "var(--c-text-secondary)",
+                  fontWeight: 600,
                 }}
               >
                 <span>{count} {locale === "mr" ? "केंद्रे" : locale === "hi" ? "केंद्र" : "Points"}</span>
-                {z.id === "hadapsar" && (
-                  <span
-                    style={{
-                      backgroundColor: "var(--color-heat-subtle)",
-                      color: "var(--color-heat)",
-                      padding: "0 4px",
-                      borderRadius: "3px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    41.8°C
-                  </span>
-                )}
+                {isSelected && <span style={{ fontSize: "0.625rem", textTransform: "uppercase" }}>Active</span>}
               </div>
             </button>
           );
         })}
       </div>
+
+      {/* Selected Facility Spotlight Callout (if a specific point is active) */}
+      {selectedPoint && (
+        <div
+          style={{
+            padding: "0.875rem",
+            borderRadius: "4px",
+            backgroundColor: "var(--c-sand-subtle)",
+            border: "1px solid var(--c-border-strong)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "0.5rem",
+          }}
+        >
+          <div>
+            <span style={{ fontSize: "0.6875rem", fontWeight: 700, textTransform: "uppercase", color: "var(--c-monsoon)" }}>
+              Atlas Active Spotlight
+            </span>
+            <h4 style={{ fontSize: "0.875rem", fontWeight: 800, color: "var(--c-deep-ink)" }}>
+              {selectedPoint.payload.name}
+            </h4>
+            <p style={{ fontSize: "0.75rem", color: "var(--c-text-secondary)" }}>
+              {selectedPoint.payload.address_hint} · Geohash: <span className="mono">{selectedPoint.geohash5}</span>
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <span className="badge badge-live">Verified Record</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

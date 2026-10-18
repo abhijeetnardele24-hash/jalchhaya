@@ -6,11 +6,14 @@
 **Secondary Track**: Security / Censorship Resistance  
 **Author / Team**: Abhijeet Nardele (India)  
 **GitHub Repository**: `https://github.com/abhijeetnardele24-hash/jalchhaya`  
+**Live Web Application**: `https://abhijeetnardele24-hash.github.io/jalchhaya/`  
 **License**: MIT License (`LICENSE`)  
 **Target Network**: Arkiv Tiramisu Testnet (`Chain ID: 7738577`)  
 **HTTP RPC**: `https://rpc.tiramisu.db-chain.testnet.arkiv.network`  
 **WebSocket RPC**: `wss://rpc.tiramisu.db-chain.testnet.arkiv.network`  
 **Tiramisu Block Explorer**: `https://tiramisu.explorer.arkiv.network`  
+**Dedicated Creator Wallet**: `0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279`  
+**Independent Attester Wallet**: `0x5b52b2516184Cc635D1A1Bc410697E3a070aa471`  
 
 ---
 
@@ -39,7 +42,7 @@ JalChhaya implements Arkiv as the authoritative state layer for four distinct en
 | `incident` | `project_id`, `entity_type`, `zone`, `severity`, `resolved` | 12–24 hours | Urgent heat alerts, pipe bursts, and localized microclimate heat spikes. |
 
 ### 7 Mandatory Compound SDK Queries Implemented:
-1. Query active facilities in Pune: `select().where({ project_id: str("jalchhaya_pune"), entity_type: str("relief_point") })`
+1. Query active facilities in Pune: `select().where({ project_id: str("jalchhaya-pune-2026"), entity_type: str("relief_point") })`
 2. Municipal zone filtering (e.g. Swargate, Deccan, Hadapsar): `where({ zone: str("swargate") })`
 3. Resource classification filtering (e.g. Water, Shaded Shelter): `where({ resource_type: str("water") })`
 4. Facility-specific observation history: `where({ relief_point_key: key(pointKey) })`
@@ -57,11 +60,13 @@ Unlike conventional hackathon demos that rely on mocked mockups, JalChhaya featu
 - Renders creation block and countdown to expiration block.
 - Displays decoded typed storage attributes (`str`, `i32`, `u64`, `key`).
 - Generates a **copyable, standalone TypeScript SDK code snippet** that judges can paste into their own terminal to reproduce the exact on-chain query.
+- **Truthful Status Surfacing**: Explicitly distinguishes between **Live On-Chain Data** (when RPC queries succeed), **Demonstration Fixtures** (for offline and evaluated flows), and **Degraded Public RPC** (when public rate limits like `ANON_COST_LIMITED` are active).
 
 ---
 
-## 4. Privacy & Indian DPDP Act Compliance
+## 4. Privacy & Indian DPDP Act Principles
 
+JalChhaya implements a privacy-minimizing design aligned with data-minimization principles of India's Digital Personal Data Protection (DPDP) Act, 2023 without making unverified legal compliance claims:
 - **Zero PII On-Chain**: No worker names, personal phone numbers, or vehicle plates are ever recorded on Arkiv.
 - **Landmark-Based Location Hints**: Addresses reference public transit hubs (e.g. "Opposite Platform 3, Deccan PMT Bus Stand") rather than private residential locations.
 - **Geohash-5 Coarsening**: Geohashes are capped at 5 characters (~4.9 km precision), preventing worker tracking.
@@ -71,8 +76,8 @@ Unlike conventional hackathon demos that rely on mocked mockups, JalChhaya featu
 
 ## 5. Technical Rigor & Testing
 
-- **Test Suite**: 33 unit tests with **97.53% statement coverage**, **94.82% function coverage**, and **90.48% branch coverage** using Vitest and `@vitest/coverage-v8`.
-- **Accessibility**: 100% automated WCAG 2.2 AA audit passing via `@axe-core/playwright`.
-- **Responsiveness**: Zero horizontal overflow verified across 320px, 390px, 768px, 1024px, 1440px, and 1920px viewports.
+- **Test Suite**: 39 unit tests across 5 test suites with **93.41% statement coverage**, **78.02% function coverage**, and **81.17% branch coverage** using Vitest and `@vitest/coverage-v8`.
+- **Accessibility**: Automated WCAG checks plus documented manual keyboard and screen-reader verification, with zero critical or serious Axe violations across all themes and viewports.
+- **Responsiveness**: 42/42 Playwright E2E tests passing with zero horizontal overflow verified across 320px, 360px, 390px, 768px, 1024px, 1440px, and 1920px viewports.
 - **Trilingual Localization**: Native support for Marathi (मराठी), Hindi (हिंदी), and English.
-- **Security**: Automated secret scanning with zero committed private keys.
+- **Security**: Automated secret scanning verifying zero committed private keys, plus zero high/critical vulnerabilities in `npm audit`.

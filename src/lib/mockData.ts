@@ -2,6 +2,10 @@ import { ReliefPoint, AvailabilityObservation, Attestation, Incident, PROJECT_ID
 
 export const OFFICIAL_DEMO_PUBLISHER = "0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279" as `0x${string}`;
 
+/**
+ * Clearly labelled synthetic demonstration fixtures for offline, degraded, or initial exploratory evaluation.
+ * In accordance with engineering integrity directives, these mock values are never misrepresented as genuine on-chain data.
+ */
 export const INITIAL_SYNTHETIC_POINTS: ReliefPoint[] = [
   {
     key: "0x1111111111111111111111111111111111111111111111111111111111111101",
@@ -18,6 +22,12 @@ export const INITIAL_SYNTHETIC_POINTS: ReliefPoint[] = [
     resourceType: "water",
     accessibility: "wheelchair_accessible",
     operatorClass: "transit_hub",
+    source: "DEMO",
+    confirmCount: 2,
+    challengeCount: 0,
+    statusConfidence: "high",
+    expirationBlock: 2024000n,
+    remainingLifetimeEst: "~29 days",
     payload: {
       name: "Deccan PMT Bus Terminal Water Kiosk",
       name_mr: "डेक्कन पीएमटी बस स्थानक पाणपोई",
@@ -43,6 +53,12 @@ export const INITIAL_SYNTHETIC_POINTS: ReliefPoint[] = [
     resourceType: "cooling_centre",
     accessibility: "wheelchair_accessible",
     operatorClass: "municipal",
+    source: "DEMO",
+    confirmCount: 1,
+    challengeCount: 0,
+    statusConfidence: "high",
+    expirationBlock: 2024100n,
+    remainingLifetimeEst: "~29 days",
     payload: {
       name: "Shivajinagar Station Ward Heat Shelter",
       name_mr: "शिवाजीनगर स्थानक प्रभाग उष्णता निवारण केंद्र",
@@ -68,6 +84,12 @@ export const INITIAL_SYNTHETIC_POINTS: ReliefPoint[] = [
     resourceType: "first_aid_ors",
     accessibility: "standard",
     operatorClass: "community_trust",
+    source: "DEMO",
+    confirmCount: 0,
+    challengeCount: 1,
+    statusConfidence: "conflicted",
+    expirationBlock: 2024150n,
+    remainingLifetimeEst: "~29 days",
     payload: {
       name: "Swargate Chowk Red Cross ORS Booth",
       name_mr: "स्वारगेट चौक रेड क्रॉस ओआरएस केंद्र",
@@ -93,6 +115,12 @@ export const INITIAL_SYNTHETIC_POINTS: ReliefPoint[] = [
     resourceType: "shade",
     accessibility: "standard",
     operatorClass: "merchant_association",
+    source: "DEMO",
+    confirmCount: 0,
+    challengeCount: 0,
+    statusConfidence: "unverified",
+    expirationBlock: 2024200n,
+    remainingLifetimeEst: "~29 days",
     payload: {
       name: "Hadapsar Gadital Gig-Worker Shade Pavilion",
       name_mr: "हडपसर गाडीतळ गिग कामगार सावली शेड",
@@ -118,6 +146,12 @@ export const INITIAL_SYNTHETIC_POINTS: ReliefPoint[] = [
     resourceType: "water",
     accessibility: "wheelchair_accessible",
     operatorClass: "community_trust",
+    source: "DEMO",
+    confirmCount: 1,
+    challengeCount: 0,
+    statusConfidence: "high",
+    expirationBlock: 2024250n,
+    remainingLifetimeEst: "~29 days",
     payload: {
       name: "Hinjawadi Phase 1 Shivaji Chowk Water Hub",
       name_mr: "हिंजवडी फेज १ शिवाजी चौक पाणपोई",
@@ -143,6 +177,12 @@ export const INITIAL_SYNTHETIC_POINTS: ReliefPoint[] = [
     resourceType: "water",
     accessibility: "wheelchair_accessible",
     operatorClass: "municipal",
+    source: "DEMO",
+    confirmCount: 1,
+    challengeCount: 0,
+    statusConfidence: "high",
+    expirationBlock: 2024300n,
+    remainingLifetimeEst: "~29 days",
     payload: {
       name: "Kothrud Stand PMC Water Station",
       name_mr: "कोथरूड स्टँड महापालिका जल केंद्र",
@@ -170,6 +210,9 @@ export const INITIAL_SYNTHETIC_OBSERVATIONS: AvailabilityObservation[] = [
     status: "available",
     severity: 1,
     observedAt: Math.floor(Date.now() / 1000) - 900, // 15 mins ago
+    source: "DEMO",
+    confirmCount: 2,
+    challengeCount: 0,
     payload: {
       queue_depth_estimate: "3-5 people",
       water_temperature: "Chilled and refreshing",
@@ -191,6 +234,9 @@ export const INITIAL_SYNTHETIC_OBSERVATIONS: AvailabilityObservation[] = [
     status: "available",
     severity: 1,
     observedAt: Math.floor(Date.now() / 1000) - 1800, // 30 mins ago
+    source: "DEMO",
+    confirmCount: 1,
+    challengeCount: 0,
     payload: {
       queue_depth_estimate: "No queue, 12 seats free",
       water_temperature: "Chilled dispenser",
@@ -212,6 +258,9 @@ export const INITIAL_SYNTHETIC_OBSERVATIONS: AvailabilityObservation[] = [
     status: "crowded",
     severity: 3,
     observedAt: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
+    source: "DEMO",
+    confirmCount: 0,
+    challengeCount: 1,
     payload: {
       queue_depth_estimate: "25+ delivery partners waiting",
       water_temperature: "Lukewarm",
@@ -232,6 +281,7 @@ export const INITIAL_SYNTHETIC_ATTESTATIONS: Attestation[] = [
     observationKey: "0x2222222222222222222222222222222222222222222222222222222222222201",
     verdict: "confirm",
     observedAt: Math.floor(Date.now() / 1000) - 600,
+    source: "DEMO",
     payload: {
       reason: "verified_in_person",
       note: "Refilled water bottle during Swiggy route, water cold and clean.",
@@ -248,6 +298,7 @@ export const INITIAL_SYNTHETIC_ATTESTATIONS: Attestation[] = [
     observationKey: "0x2222222222222222222222222222222222222222222222222222222222222201",
     verdict: "confirm",
     observedAt: Math.floor(Date.now() / 1000) - 300,
+    source: "DEMO",
     payload: {
       reason: "verified_in_person",
       note: "Confirmed operational. Volunteer refilled water tank at 13:00.",
@@ -269,6 +320,7 @@ export const INITIAL_SYNTHETIC_INCIDENTS: Incident[] = [
     incidentType: "extreme_crowding",
     severity: 4,
     openedAt: Math.floor(Date.now() / 1000) - 1800,
+    source: "DEMO",
     payload: {
       headline: "Hadapsar Gadital: Extreme Heat Spike (41.8°C) Causing High Relief Congestion",
       action_guidance: "Delivery partners advised to route to Swargate Depot relief point or Deccan Gymkhana to avoid long queues.",

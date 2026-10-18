@@ -29,11 +29,16 @@ describe("UI Components", () => {
         onConnectWallet={onConnectWallet}
         onDisconnectWallet={onDisconnectWallet}
         onOpenEvidence={onOpenEvidence}
+        connectionState="connected"
+        lastEventAt={null}
+        dataSourceMode="LIVE"
+        onToggleDataMode={vi.fn()}
       />
     );
 
     expect(screen.getByText("JalChhaya")).toBeInTheDocument();
-    expect(screen.getByText("Arkiv Tiramisu (7738577)")).toBeInTheDocument();
+    expect(screen.getByText(/Chain ID: 7738577/)).toBeInTheDocument();
+    expect(screen.getByText("Arkiv WS: Connected")).toBeInTheDocument();
 
     const mrBtn = screen.getByText("मराठी");
     fireEvent.click(mrBtn);
@@ -56,6 +61,10 @@ describe("UI Components", () => {
         onConnectWallet={vi.fn()}
         onDisconnectWallet={onDisconnect}
         onOpenEvidence={vi.fn()}
+        connectionState="connected"
+        lastEventAt={null}
+        dataSourceMode="LIVE"
+        onToggleDataMode={vi.fn()}
       />
     );
 
@@ -88,7 +97,7 @@ describe("UI Components", () => {
       />
     );
 
-    expect(screen.getByText("Pune Municipal Zone Grid")).toBeInTheDocument();
+    expect(screen.getByText("Pune Civic Heat-Relief Atlas")).toBeInTheDocument();
 
     // Click zones
     const zonesToClick = [
@@ -97,7 +106,7 @@ describe("UI Components", () => {
       "Swargate",
       "Hadapsar",
       "Kothrud",
-      "Hinjawadi IT Park",
+      "Hinjawadi",
       "Katraj",
       "Yerawada",
     ];

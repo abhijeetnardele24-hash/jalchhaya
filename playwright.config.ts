@@ -18,6 +18,10 @@ export default defineConfig({
       use: { viewport: { width: 320, height: 600 } },
     },
     {
+      name: "Mobile Mid (360px)",
+      use: { viewport: { width: 360, height: 740 } },
+    },
+    {
       name: "Mobile Standard (390px)",
       use: { viewport: { width: 390, height: 844 } },
     },
