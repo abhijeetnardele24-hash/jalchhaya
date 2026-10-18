@@ -30,8 +30,14 @@ jobs:
       - name: Vitest Unit Coverage (>85% Threshold)
         run: npm test
 
+      - name: Dependency Vulnerability Audit
+        run: npm run audit
+
       - name: Production Vite Build
         run: npm run build
+
+      - name: Secret & Credential Scan
+        run: npm run security-scan
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium

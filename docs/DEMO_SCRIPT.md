@@ -51,5 +51,5 @@
 ### [02:15 – 02:35] Scene 5: Censorship Resistance & The Winning Impact
 - **Visual**: Show the full dashboard running against live Arkiv Tiramisu (`Chain ID: 7738577`), showcasing the open-source GitHub repository and passing test suite.
 - **Voiceover**:
-  > *It is 100% open source under the MIT License, tested across comprehensive unit and end-to-end suites, verified via automated WCAG checks plus documented manual keyboard and screen-reader testing, and deployed live on GitHub Pages and Arkiv Tiramisu testnet.*  
+  > *It is 100% open source under the MIT License, tested across comprehensive unit and end-to-end suites, verified via automated WCAG accessibility audits and keyboard navigation testing, and deployed live on GitHub Pages and Arkiv Tiramisu testnet.*  
   > *Thank you, and stay cool with JalChhaya."*

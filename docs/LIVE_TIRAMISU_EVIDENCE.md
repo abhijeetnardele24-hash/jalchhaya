@@ -21,25 +21,35 @@ Running `npm run verify-onchain` executes strict, automated on-chain verificatio
 ==================================================================
       JalChhaya: Arkiv Tiramisu Strict On-Chain Verification      
 ==================================================================
-[CHECK 1/5] Connecting to RPC endpoint: https://rpc.tiramisu.db-chain.testnet.arkiv.network
-  [PASS] RPC is healthy. Current Live Block Height: #733989
-[CHECK 2/5] Validating Chain ID...
+[CHECK 1/4] Connecting to RPC endpoint: https://rpc.tiramisu.db-chain.testnet.arkiv.network
+  [PASS] RPC is reachable. Current Live Block Height: #734712
+[CHECK 2/4] Validating Chain ID...
   [PASS] Chain ID verified: 7738577 (Arkiv Tiramisu Testnet)
-[CHECK 3/5] Querying on-chain entities for project: 'jalchhaya-pune-2026'...
+[CHECK 3/4] Querying on-chain entities for project: 'jalchhaya-pune-2026' (with full attributes)...
+  Attempt 1/2 fetching entities via client.select({ attributes: true, ... })...
+  [ATTEMPT 1 RATE LIMITED] HTTP 429 ANON_COST_LIMITED: Public unauthenticated query budget exhausted.
+  Waiting 2000ms before retry...
+  Attempt 2/2 fetching entities via client.select({ attributes: true, ... })...
+  [ATTEMPT 2 RATE LIMITED] HTTP 429 ANON_COST_LIMITED: Public unauthenticated query budget exhausted.
+  [FAIL] Arkiv public RPC rate-limited (HTTP 429 ANON_COST_LIMITED): unauthenticated query budget exhausted. Fund testnet wallets at https://hub.arkiv.network/faucet to broadcast transactions.
+[EVIDENCE] Written to docs/live_evidence.json
+==================================================================
+  [FAIL] On-chain verification failed as required by strict test.
+==================================================================
 ```
 
 Unlike synthetic claims, `verify-onchain` strictly validates:
 1. RPC connectivity and block generation.
 2. Correct Chain ID (`7738577`).
-3. Execution of compound query matching `eq("project_id", str("jalchhaya-pune-2026"))`.
-4. Relational integrity of observations and peer attestations.
+3. Execution of compound query matching `eq("project_id", str("jalchhaya-pune-2026"))` with full `attributes: true` selection.
+4. Schema fields, creator provenance, expiry values, and relational integrity of observations and peer attestations.
 5. Export of machine-readable verification evidence to `docs/live_evidence.json`.
 
 ---
 
 ## 2. Machine-Readable Evidence Artifact (`docs/live_evidence.json`)
 
-The test and verification runners generate a structured JSON artifact summarizing network state, verified wallets, and entity relationships:
+The verifier records the current network state, verified wallets, and distinct verification statuses:
 
 ```json
 {
@@ -49,13 +59,21 @@ The test and verification runners generate a structured JSON artifact summarizin
     "rpcUrl": "https://rpc.tiramisu.db-chain.testnet.arkiv.network",
     "wsUrl": "wss://rpc.tiramisu.db-chain.testnet.arkiv.network",
     "explorerUrl": "https://explorer.tiramisu.db-chain.testnet.arkiv.network",
-    "verifiedBlockHeight": "733989"
+    "verifiedBlockHeight": "734712"
   },
   "projectId": "jalchhaya-pune-2026",
   "wallets": {
     "creator": "0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279",
     "attester": "0x5b52b2516184Cc635D1A1Bc410697E3a070aa471"
-  }
+  },
+  "statuses": {
+    "rpcReachable": true,
+    "chainIdVerified": true,
+    "projectQuerySuccessful": false,
+    "projectEntitiesValidated": false
+  },
+  "onchainVerified": false,
+  "statusMessage": "Arkiv public RPC rate-limited (HTTP 429 ANON_COST_LIMITED): unauthenticated query budget exhausted. Fund testnet wallets at https://hub.arkiv.network/faucet to broadcast transactions."
 }
 ```
 

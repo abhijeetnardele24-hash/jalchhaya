@@ -76,8 +76,9 @@ JalChhaya implements a privacy-minimizing design aligned with data-minimization 
 
 ## 5. Technical Rigor & Testing
 
-- **Test Suite**: 39 unit tests across 5 test suites with **93.41% statement coverage**, **78.02% function coverage**, and **81.17% branch coverage** using Vitest and `@vitest/coverage-v8`.
-- **Accessibility**: Automated WCAG checks plus documented manual keyboard and screen-reader verification, with zero critical or serious Axe violations across all themes and viewports.
-- **Responsiveness**: 42/42 Playwright E2E tests passing with zero horizontal overflow verified across 320px, 360px, 390px, 768px, 1024px, 1440px, and 1920px viewports.
+- **Test Suite**: 54 unit tests across 6 test suites with **93.33% statement coverage**, **75.78% function coverage**, and **81.66% branch coverage** using Vitest and `@vitest/coverage-v8`.
+- **Accessibility**: Automated Axe WCAG 2.2 AA audits (landing, evidence drawer, modals) and keyboard traversal across 7 viewports (320px–1920px), reporting zero critical or serious Axe violations (automated scans, not certified screen-reader testing).
+- **Responsiveness & Offline**: 63/63 Playwright E2E tests passing with zero horizontal overflow verified across 320px, 360px, 390px, 768px, 1024px, 1440px, and 1920px viewports, including service-worker offline reading.
 - **Trilingual Localization**: Native support for Marathi (मराठी), Hindi (हिंदी), and English.
-- **Security**: Automated secret scanning verifying zero committed private keys, plus zero high/critical vulnerabilities in `npm audit`.
+- **Security**: Comprehensive secret scanner verifying full Git commit history, git-tracked files, and production dist bundle for zero leaked credentials or private keys, plus zero high/critical vulnerabilities in `npm audit`.
+- **On-Chain Verification State**: Live Tiramisu RPC connection and Chain ID `7738577` strictly verified at block `#734712`. Live entity broadcast gated on testnet faucet funding due to unauthenticated RPC query limits (`ANON_COST_LIMITED`). Transparent machine-readable evidence artifact maintained in `docs/live_evidence.json`.

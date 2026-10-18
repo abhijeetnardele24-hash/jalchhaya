@@ -15,6 +15,7 @@ interface HeaderProps {
   lastEventAt: Date | null;
   dataSourceMode: DataSourceMode;
   onToggleDataMode: () => void;
+  isOffline?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -28,10 +29,12 @@ export const Header: React.FC<HeaderProps> = ({
   lastEventAt,
   dataSourceMode,
   onToggleDataMode,
+  isOffline = false,
 }) => {
   const t = translations[locale];
 
   const getConnectionDotColor = () => {
+    if (isOffline) return "#718285";
     switch (connectionState) {
       case "connected":
         return "var(--c-leaf)";
@@ -47,6 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const getConnectionLabel = () => {
+    if (isOffline) return "Offline: Cached Directory";
     switch (connectionState) {
       case "connected":
         return "Arkiv WS: Connected";
@@ -75,6 +79,29 @@ export const Header: React.FC<HeaderProps> = ({
         boxShadow: "var(--shadow-subtle)",
       }}
     >
+      {isOffline && (
+        <div
+          role="status"
+          aria-live="polite"
+          data-testid="offline-indicator"
+          style={{
+            backgroundColor: "var(--c-sand)",
+            borderBottom: "1px solid var(--c-border)",
+            padding: "0.5rem 1rem",
+            fontSize: "0.8125rem",
+            fontWeight: 600,
+            color: "var(--c-navy)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.5rem",
+            textAlign: "center",
+          }}
+        >
+          <AlertCircle size={16} color="var(--c-heat)" aria-hidden="true" />
+          <span>Offline Mode (Cached Relief Directory) — Device is offline. Cached read access is preserved. Writes to Arkiv are disabled until network is restored.</span>
+        </div>
+      )}
       <div className="container">
         {/* Top Header Row */}
         <div

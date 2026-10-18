@@ -40,6 +40,19 @@ export const App: React.FC = () => {
   // Connection State Machine
   const [connectionState, setConnectionState] = useState<ConnectionState>("connecting");
   const [lastEventAt, setLastEventAt] = useState<Date | null>(null);
+  const [isOffline, setIsOffline] = useState<boolean>(typeof navigator !== "undefined" ? !navigator.onLine : false);
+
+  // Subscribe to Browser Online/Offline Events
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   // Mobile View Toggle: "atlas" (map) vs "list" (relief board)
   const [mobileTab, setMobileTab] = useState<"atlas" | "list">("list");
@@ -186,6 +199,7 @@ export const App: React.FC = () => {
         lastEventAt={lastEventAt}
         dataSourceMode={dataSourceMode}
         onToggleDataMode={handleToggleDataMode}
+        isOffline={isOffline}
       />
 
       {/* Main Command Board Content */}

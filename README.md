@@ -33,13 +33,16 @@ Existing tools provide static directory listings or city-wide weather warnings. 
 
 | Test Suite | Scope | Target | Result | Status |
 |---|---|---|---|---|
-| **Unit Coverage (Vitest)** | 39 unit tests across App, components, SDK service, schemas | >85% | **93.41% Statements, 78.02% Functions, 81.17% Branches** | **PASS** |
-| **Accessibility (Playwright Axe)** | Automated WCAG checks plus documented manual keyboard & screen-reader verification | 0 violations | **0 Critical / 0 Serious / 0 Moderate Violations** | **PASS** |
-| **Cross-Viewport Responsiveness** | 320px, 360px, 390px, 768px, 1024px, 1440px, 1920px | Zero overflow | **42/42 Playwright Tests Passing** | **PASS** |
+| **Unit Coverage (Vitest)** | 54 unit tests across 6 suites (App, components, SDK service, schemas, verifier) | >85% | **93.33% Statements, 75.78% Functions, 81.66% Branches** | **PASS** |
+| **Accessibility (Playwright Axe)** | Automated Axe checks (WCAG 2.2 AA rules) on landing view, Evidence Drawer, and Observation modal | 0 violations | **0 Critical / 0 Serious Violations across all 7 viewports** | **PASS** |
+| **Cross-Viewport & Offline E2E** | 7 viewports (320px–1920px), keyboard skip navigation, offline read mode, PWA service worker | Zero layout break | **63/63 Playwright Tests Passing** | **PASS** |
 | **TypeScript Typecheck** | `tsc --noEmit` | 0 errors | **0 Errors** | **PASS** |
-| **Production Build** | `vite build` | Clean bundle | **Zero sourcemaps, chunk-split** | **PASS** |
-| **Secret Scanning** | Git tracked tree & bundle | 0 private keys | **Zero credentials or secrets staged** | **PASS** |
-| **Dependency Audit** | `npm audit --omit=dev` | 0 vulnerabilities | **0 High/Critical Vulnerabilities** | **PASS** |
+| **Production Build** | `vite build` | Clean bundle | **Zero sourcemaps, route-split chunks** | **PASS** |
+| **Secret Scanning** | Full Git history, working tree, and production dist bundle | 0 secrets | **Zero credentials or private keys detected** | **PASS** |
+| **Dependency Audit** | `npm audit --omit=dev --audit-level=high` | 0 vulnerabilities | **0 High/Critical Vulnerabilities** | **PASS** |
+| **Strict On-Chain Verifier** | Live RPC reachability, chain ID 7738577, compound query, schema & relational integrity | Validated live entities | **RPC & Chain ID Verified (#734712); Entity Broadcast Pending Faucet Gas (429 ANON_COST_LIMITED)** | **GATE ACTIVE** |
+
+> **Verification Notice**: The testnet RPC endpoint and Chain ID (`7738577`) are strictly verified on-chain. However, the public unauthenticated query budget enforces an `ANON_COST_LIMITED` cap. Live entity verification is preserved as an active gating check that will pass once testnet wallets (`0x8Bcb...0279` and `0x5b52...a471`) receive testnet gas from the official faucet and broadcast the canonical seed set. Automated Axe audits verify zero critical or serious WCAG rule violations; they represent automated compliance scans rather than manual certified screen-reader audits.
 
 ---
 

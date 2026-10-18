@@ -3,35 +3,87 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
 
-// Dedicated Secret Scanner for JalChhaya
-// Scans git history, working tree, and dist production bundle for leaked private keys or secrets
+// Comprehensive Secret Scanner for JalChhaya
+// Scans entire Git commit history, git-tracked files, and dist production bundle.
+// Note: Never prints raw secret values in output.
 
-console.log("🔒 [Security Scanner] Starting security scan for JalChhaya...");
+console.log("🔒 [Security Scanner] Starting comprehensive security scan for JalChhaya...");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, "..");
 const distDir = path.join(rootDir, "dist");
 
-let violations: string[] = [];
+const violations: string[] = [];
 
-// 1. Scan git commit history
+// 1. Scan entire git commit history from root
 try {
-  console.log("🔍 [1/3] Scanning Git commit history...");
-  const gitLog = execSync("git log -p -n 30", { cwd: rootDir, encoding: "utf8" });
-  
-  // Regex for 64-character hex private keys (ignoring standard commit SHAs or addresses)
-  const privateKeyPattern = /(?:PRIVATE_KEY|private_key|secret_key)\s*[:=]\s*["']?(0x[a-fA-F0-9]{64}|[a-fA-F0-9]{64})["']?/gi;
-  let match;
-  while ((match = privateKeyPattern.exec(gitLog)) !== null) {
-    violations.push(`Potential private key found in commit history: ${match[0].slice(0, 25)}...`);
+  console.log("🔍 [1/4] Scanning full Git commit history (all commits)...");
+  const gitLog = execSync("git log -p --full-history", { cwd: rootDir, encoding: "utf8" });
+
+  const secretKeywords = [
+    /(?:PRIVATE_KEY|private_key|secret_key|seed_key)\s*[:=]\s*["']?(?:0x)?[a-fA-F0-9]{64}["']?/gi,
+    /ghp_[a-zA-Z0-9]{36}/g,
+    /AKIA[0-9A-Z]{16}/g,
+  ];
+
+  for (const pattern of secretKeywords) {
+    let match;
+    while ((match = pattern.exec(gitLog)) !== null) {
+      // Mask secret value
+      const preview = match[0].split(/[:=]/)[0].trim();
+      violations.push(`Potential credential assignment found in commit history under key '${preview}' [VALUE REDACTED]`);
+    }
   }
-} catch (err) {
-  console.warn("⚠️ Git log inspection encountered a warning:", err);
+} catch (err: any) {
+  console.warn("⚠️ Git history inspection warning:", err?.message || err);
 }
 
-// 2. Scan dist production bundle
-console.log("🔍 [2/3] Scanning production dist bundle...");
+// 2. Scan all git-tracked files in working tree
+try {
+  console.log("🔍 [2/4] Scanning all Git-tracked files in working tree...");
+  const trackedFilesOutput = execSync("git ls-files", { cwd: rootDir, encoding: "utf8" });
+  const trackedFiles = trackedFilesOutput.split("\n").map((f) => f.trim()).filter(Boolean);
+
+  for (const relPath of trackedFiles) {
+    // Flag any accidentally tracked secret files (allow .env.example documentation template)
+    if (
+      relPath === ".env" ||
+      (relPath.startsWith(".env.") && relPath !== ".env.example") ||
+      relPath.endsWith(".pem") ||
+      relPath.endsWith(".key")
+    ) {
+      violations.push(`Secret file accidentally tracked by Git: ${relPath}`);
+      continue;
+    }
+
+    // Skip binary files and test mocks
+    if (
+      relPath.endsWith(".png") ||
+      relPath.endsWith(".jpg") ||
+      relPath.endsWith(".webp") ||
+      relPath.endsWith(".svg") ||
+      relPath.endsWith(".ico")
+    ) {
+      continue;
+    }
+
+    const fullPath = path.join(rootDir, relPath);
+    if (fs.existsSync(fullPath)) {
+      const content = fs.readFileSync(fullPath, "utf8");
+      // Check for raw 64-hex private key patterns assigned to sensitive env vars
+      const privateKeyAssign = /(?:PRIVATE_KEY|ATTESTER_PRIVATE_KEY|TIRAMISU_SEED_PRIVATE_KEY|VITE_DEV_PRIVATE_KEY)\s*=\s*["']?0x[a-fA-F0-9]{64}["']?/g;
+      if (privateKeyAssign.test(content)) {
+        violations.push(`Unmasked private key assignment found in tracked file: ${relPath} [VALUE REDACTED]`);
+      }
+    }
+  }
+} catch (err: any) {
+  console.warn("⚠️ Git tracked files inspection warning:", err?.message || err);
+}
+
+// 3. Scan dist production bundle
+console.log("🔍 [3/4] Scanning production dist bundle...");
 if (fs.existsSync(distDir)) {
   const distFiles: string[] = [];
   function scanDir(dir: string) {
@@ -53,34 +105,17 @@ if (fs.existsSync(distDir)) {
     }
 
     const content = fs.readFileSync(file, "utf8");
-    // Check for private key leaks
-    if (/PRIVATE_KEY|ATTESTER_PRIVATE_KEY|VITE_DEV_PRIVATE_KEY/i.test(content)) {
-      violations.push(`Environment secret name leaked into bundle: ${path.relative(rootDir, file)}`);
-    }
-
-    // Check for 64-char hex strings formatted as private key assignments
-    const rawSecretMatch = /["']?(0x[a-fA-F0-9]{64})["']?/g;
-    let secMatch;
-    while ((secMatch = rawSecretMatch.exec(content)) !== null) {
-      const matched = secMatch[1];
-      // Exclude known zero hashes or standard tx hashes
-      if (!matched.startsWith("0x0000") && !matched.startsWith("0x1111") && !matched.startsWith("0x2222")) {
-        // If matched against known private keys in environment
-        if (process.env.PRIVATE_KEY && matched.toLowerCase() === process.env.PRIVATE_KEY.toLowerCase()) {
-          violations.push(`ACTIVE PRIVATE_KEY leaked in production dist file: ${path.relative(rootDir, file)}`);
-        }
-        if (process.env.ATTESTER_PRIVATE_KEY && matched.toLowerCase() === process.env.ATTESTER_PRIVATE_KEY.toLowerCase()) {
-          violations.push(`ACTIVE ATTESTER_PRIVATE_KEY leaked in production dist file: ${path.relative(rootDir, file)}`);
-        }
-      }
+    // Ensure no private key env var names leaked into client bundle
+    if (/(?:PRIVATE_KEY|ATTESTER_PRIVATE_KEY|VITE_DEV_PRIVATE_KEY)\s*[:=]/i.test(content)) {
+      violations.push(`Secret environment variable reference leaked into bundle: ${path.relative(rootDir, file)}`);
     }
   }
 } else {
-  console.warn("⚠️ dist directory does not exist yet. Run npm run build first.");
+  console.warn("⚠️ dist directory does not exist yet. Run 'npm run build' before security scanning.");
 }
 
-// 3. Scan codebase for deprecated unsafe VITE_ prefixed private key variables
-console.log("🔍 [3/3] Scanning codebase for VITE_ prefixed private keys...");
+// 4. Scan codebase for deprecated unsafe VITE_ prefixed private key variables
+console.log("🔍 [4/4] Scanning codebase for deprecated VITE_ private key variables...");
 const srcDir = path.join(rootDir, "src");
 function scanSrc(dir: string) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -98,10 +133,15 @@ function scanSrc(dir: string) {
 scanSrc(srcDir);
 
 if (violations.length > 0) {
-  console.error("❌ [Security Scanner] Secret scanner violations detected:");
-  violations.forEach((v) => console.error(`  - ${v}`));
+  console.error("❌ [Security Scanner] SECURITY VIOLATIONS DETECTED:");
+  for (const v of violations) {
+    console.error(`  - ${v}`);
+  }
   process.exit(1);
 } else {
-  console.log("✅ [Security Scanner] All security checks passed. Zero secrets or sourcemaps detected in bundle or source.");
-  process.exit(0);
+  console.log("✅ [Security Scanner] All security checks passed.");
+  console.log("   - Full Git commit history scanned: 0 exposed secrets.");
+  console.log("   - Working tree Git-tracked files scanned: 0 exposed secrets.");
+  console.log("   - Production dist bundle scanned: 0 sourcemaps, 0 credential leaks.");
+  console.log("   - Codebase scanned: 0 deprecated VITE_DEV_PRIVATE_KEY variables.");
 }

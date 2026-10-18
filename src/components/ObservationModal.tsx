@@ -48,6 +48,10 @@ export const ObservationModal: React.FC<ObservationModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      setErrorMessage("Cannot broadcast while offline. Offline mode provides read access to cached relief points, but new observations require an active network connection to reach Arkiv.");
+      return;
+    }
     if (!walletAddress) {
       setErrorMessage(t.noWalletInstalled);
       return;

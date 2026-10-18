@@ -46,6 +46,10 @@ export const AttestationModal: React.FC<AttestationModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      setErrorMessage("Cannot attest while offline. Offline mode provides read access to cached relief points, but new attestations require an active network connection to reach Arkiv.");
+      return;
+    }
     if (!walletAddress) {
       setErrorMessage(t.noWalletInstalled);
       return;

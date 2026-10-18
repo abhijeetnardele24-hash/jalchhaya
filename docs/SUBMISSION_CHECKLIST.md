@@ -22,10 +22,11 @@
 | **7 Compound Predicate Queries** | Documented in `arkiv/schema.md` and executed in `src/lib/arkivService.ts`. | **VERIFIED** |
 | **On-Chain Evidence Inspector** | Built-in judge drawer with copyable TypeScript SDK code snippet reproducing exact state query. | **VERIFIED** |
 | **Zero PII Privacy Boundary** | Enforced via Zod schemas, landmark addressing, 5-char geohashes, and automated data expiration. | **VERIFIED** |
-| **Unit Test Coverage > 85%** | **93.41% Statements**, **78.02% Functions**, **81.17% Branches** across 39 unit tests with Vitest. | **VERIFIED** |
-| **E2E & Axe Accessibility** | Automated WCAG checks plus documented manual keyboard and screen-reader verification. 42/42 Playwright tests passing across 320px, 360px, 390px, 768px, 1024px, 1440px, 1920px with zero horizontal overflow. | **VERIFIED** |
+| **Unit Test Coverage > 85%** | **93.33% Statements**, **75.78% Functions**, **81.66% Branches** across 54 unit tests with Vitest. | **VERIFIED** |
+| **E2E & Axe Accessibility** | Automated Axe WCAG 2.2 AA audits (landing, evidence drawer, modals), keyboard traversal, and offline PWA tests across 7 viewports (320px–1920px). 63/63 Playwright tests passing (automated scans, not certified screen-reader testing). | **VERIFIED** |
 | **Trilingual Accessibility** | Complete English, Marathi (मराठी), and Hindi (हिंदी) localization for local Pune workforce. | **VERIFIED** |
-| **Secret Scanning & Security** | `.env.local` strictly git-ignored. Zero private keys or credentials staged or committed. | **VERIFIED** |
+| **Secret Scanning & Security** | Full Git commit history, git-tracked files, and dist bundle scanned; zero private keys staged or leaked. | **VERIFIED** |
+| **Strict On-Chain Verifier** | RPC reachable & Chain ID 7738577 verified on Tiramisu (#734712); live entity broadcast gated by testnet faucet funding (429 rate limit). | **GATE ACTIVE** |
 | **Developer Experience Report** | Detailed 5-issue DX friction report with code snippets in `arkiv/friction.md`. | **VERIFIED** |
 
 ---
