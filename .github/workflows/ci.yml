@@ -1,0 +1,40 @@
+name: CI Quality & Verification Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    name: Build, Typecheck & Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: TypeScript Static Typecheck
+        run: npm run typecheck
+
+      - name: Vitest Unit Coverage (>85% Threshold)
+        run: npm test
+
+      - name: Production Vite Build
+        run: npm run build
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright E2E & WCAG 2.2 AA Audits
+        run: npm run test:e2e
