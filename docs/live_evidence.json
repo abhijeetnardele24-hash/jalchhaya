@@ -4,14 +4,15 @@
     "chainName": "Arkiv Tiramisu Testnet",
     "rpcUrl": "https://rpc.tiramisu.db-chain.testnet.arkiv.network",
     "wsUrl": "wss://rpc.tiramisu.db-chain.testnet.arkiv.network",
-    "explorerUrl": "https://explorer.tiramisu.db-chain.testnet.arkiv.network",
-    "verifiedBlockHeight": "736045",
-    "verifiedAt": "2026-10-18T11:10:26.614Z"
+    "explorerUrl": "https://tiramisu.explorer.arkiv.network",
+    "verifiedBlockHeight": "739722",
+    "verifiedAt": "2026-10-18T13:13:00.145Z"
   },
   "projectId": "jalchhaya-pune-2026",
   "wallets": {
     "creator": "0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279",
-    "attester": "0x5b52b2516184Cc635D1A1Bc410697E3a070aa471"
+    "attester": "0x5b52b2516184Cc635D1A1Bc410697E3a070aa471",
+    "submissionProof": "0x4064bb37D501fb65d89edC7d454900D2De0Dc0d1"
   },
   "statuses": {
     "rpcReachable": true,

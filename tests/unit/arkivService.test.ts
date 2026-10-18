@@ -3,6 +3,8 @@ import {
   fetchReliefPointsWithTruth,
   fetchIncidentsWithTruth,
   publishAvailabilityObservation,
+  publishSubmissionDemoProof,
+  SUBMISSION_PROOF_WALLET,
   publishAttestation,
   arkivConnectionManager,
   ensureTiramisuNetwork,
@@ -14,6 +16,8 @@ vi.mock("@arkiv-network/sdk", () => {
   return {
     createPublicClient: vi.fn().mockImplementation(() => ({
       getBlockNumber: vi.fn().mockResolvedValue(732950n),
+      getChainId: vi.fn().mockResolvedValue(7738577),
+      getBalance: vi.fn().mockResolvedValue(1_000_000_000_000_000_000n),
       getEntity: vi.fn().mockResolvedValue({ key: "0x123", attributes: {} }),
       select: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
@@ -98,7 +102,7 @@ describe("Arkiv Service & Connection State Machine", () => {
     expect(res.success).toBe(true);
     expect(mockProvider.request).toHaveBeenCalledWith({
       method: "wallet_switchEthereumChain",
-      params: [{ chainId: "0x761591" }],
+      params: [{ chainId: "0x7614d1" }],
     });
   });
 
@@ -157,7 +161,7 @@ describe("Arkiv Service & Connection State Machine", () => {
     const steps: string[] = [];
     const mockProvider = {
       request: vi.fn().mockImplementation(({ method }) => {
-        if (method === "eth_chainId") return Promise.resolve("0x761591");
+        if (method === "eth_chainId") return Promise.resolve("0x7614d1");
         return Promise.resolve();
       }),
     };
@@ -187,11 +191,50 @@ describe("Arkiv Service & Connection State Machine", () => {
     expect(steps).toContain("confirmed");
   });
 
+  it("publishes only a labeled one-day synthetic proof from the approved wallet and verifies it", async () => {
+    const steps: string[] = [];
+    const mockProvider = {
+      request: vi.fn().mockImplementation(({ method }) => {
+        if (method === "eth_chainId") return Promise.resolve("0x7614d1");
+        if (method === "eth_accounts") return Promise.resolve([SUBMISSION_PROOF_WALLET]);
+        return Promise.resolve();
+      }),
+    };
+
+    const result = await publishSubmissionDemoProof(
+      mockProvider,
+      SUBMISSION_PROOF_WALLET,
+      (step) => steps.push(step)
+    );
+
+    expect(result.verified).toBe(true);
+    expect(result.entityKey).toBeDefined();
+    expect(steps).toContain("prompting_wallet");
+    expect(steps).toContain("confirmed");
+    const { createWalletClient, jsonToPayload, ExpirationTime } = await import("@arkiv-network/sdk");
+    expect(createWalletClient).toHaveBeenCalledWith(expect.objectContaining({ account: SUBMISSION_PROOF_WALLET }));
+    expect(ExpirationTime.fromDays).toHaveBeenCalledWith(1);
+    expect(jsonToPayload).toHaveBeenCalledWith(expect.objectContaining({
+      record_kind: "protocol_integration_demo_proof",
+      synthetic_demo: true,
+      notice: expect.stringContaining("Not a real relief facility"),
+    }));
+  });
+
+  it("refuses the synthetic proof for any wallet other than the user-approved address", async () => {
+    const provider = { request: vi.fn() };
+    await expect(publishSubmissionDemoProof(
+      provider,
+      "0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279" as `0x${string}`
+    )).rejects.toThrow("Connect the approved proof wallet");
+    expect(provider.request).not.toHaveBeenCalled();
+  });
+
   it("publishes attestation with network verification and confirmed state", async () => {
     const steps: string[] = [];
     const mockProvider = {
       request: vi.fn().mockImplementation(({ method }) => {
-        if (method === "eth_chainId") return Promise.resolve("0x761591");
+        if (method === "eth_chainId") return Promise.resolve("0x7614d1");
         return Promise.resolve();
       }),
     };

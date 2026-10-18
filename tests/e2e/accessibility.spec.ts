@@ -108,6 +108,26 @@ test.describe("JalChhaya WCAG 2.2 AA Accessibility & Responsiveness", () => {
     await expect(dialog).not.toBeVisible();
   });
 
+  test("opens the isolated synthetic proof dialog with accessible, explicit labeling", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    await page.getByRole("button", { name: /Open proof flow/ }).click();
+
+    const dialog = page.getByRole("dialog", { name: "Create a synthetic testnet record" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText(/not a real relief facility/i);
+    await expect(dialog).toContainText("Arkiv Tiramisu testnet · Chain 7738577");
+    await expect(dialog.getByRole("button", { name: /Create synthetic testnet proof/ })).toBeDisabled();
+
+    const results = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(results.violations.filter((violation) => violation.impact === "critical" || violation.impact === "serious")).toEqual([]);
+
+    await page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible();
+  });
+
   test("filters relief points by zone and search term without layout break", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");

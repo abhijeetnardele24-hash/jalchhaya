@@ -7,7 +7,7 @@ import {
 import { tiramisu } from "@arkiv-network/sdk/chains";
 import { str, i32, u64, key as arkivKey } from "@arkiv-network/sdk/attr";
 import { eq } from "@arkiv-network/sdk/query";
-import { http, custom, webSocket } from "viem";
+import { http, custom, webSocket, formatEther } from "viem";
 import {
   ReliefPoint,
   AvailabilityObservation,
@@ -26,10 +26,10 @@ import {
 } from "./mockData";
 
 export const TIRAMISU_CHAIN_ID = 7738577;
-export const TIRAMISU_CHAIN_HEX = "0x761591";
+export const TIRAMISU_CHAIN_HEX = "0x7614d1";
 export const TIRAMISU_HTTP_RPC = "https://rpc.tiramisu.db-chain.testnet.arkiv.network";
 export const TIRAMISU_WS_RPC = "wss://rpc.tiramisu.db-chain.testnet.arkiv.network";
-export const TIRAMISU_EXPLORER = "https://explorer.tiramisu.db-chain.testnet.arkiv.network";
+export const TIRAMISU_EXPLORER = "https://tiramisu.explorer.arkiv.network";
 
 export type ConnectionState = "connecting" | "connected" | "reconnecting" | "degraded" | "disconnected";
 
@@ -313,6 +313,93 @@ export type TxStep =
   | "confirmed"
   | "rejected"
   | "failed";
+
+/**
+ * Publish a one-day, explicitly synthetic entity used only to demonstrate the
+ * Arkiv write path. This is intentionally separate from civic observations.
+ */
+export const SUBMISSION_PROOF_WALLET =
+  "0x4064bb37D501fb65d89edC7d454900D2De0Dc0d1" as `0x${string}`;
+
+export async function publishSubmissionDemoProof(
+  ethereumProvider: any,
+  accountAddress: `0x${string}`,
+  onStatusUpdate?: (step: TxStep, txHash?: string, message?: string) => void
+): Promise<{ entityKey: string; txHash: string; expiresAt: bigint; verified: boolean }> {
+  if (accountAddress.toLowerCase() !== SUBMISSION_PROOF_WALLET.toLowerCase()) {
+    throw new Error(`Connect the approved proof wallet ${SUBMISSION_PROOF_WALLET}.`);
+  }
+
+  onStatusUpdate?.("network_check", undefined, "Checking wallet and Arkiv Tiramisu network…");
+  const accounts = await ethereumProvider?.request?.({ method: "eth_accounts" });
+  if (!Array.isArray(accounts) || !accounts.some((value: string) => value.toLowerCase() === accountAddress.toLowerCase())) {
+    throw new Error("The approved wallet is not connected to this app. Connect it and try again.");
+  }
+  const network = await ensureTiramisuNetwork(ethereumProvider);
+  if (!network.success) throw new Error(network.error || "Could not switch to Arkiv Tiramisu.");
+
+  const chainId = await arkivPublicClient.getChainId();
+  if (chainId !== TIRAMISU_CHAIN_ID) {
+    throw new Error(`Refusing to write: Arkiv RPC reports chain ${chainId}, expected ${TIRAMISU_CHAIN_ID}.`);
+  }
+
+  const balance = await arkivPublicClient.getBalance({ address: accountAddress });
+  if (balance === 0n) {
+    throw new Error("This wallet has no Tiramisu testnet gas. Claim free test tokens at https://hub.arkiv.network/faucet, then retry.");
+  }
+
+  onStatusUpdate?.("preparing", undefined, `Preparing a synthetic proof (wallet balance ${formatEther(balance)} GLM).`);
+  const walletClient = createWalletClient({
+    chain: tiramisu,
+    transport: custom(ethereumProvider),
+    account: accountAddress,
+  });
+  const createdAt = new Date().toISOString();
+  onStatusUpdate?.("prompting_wallet", undefined, "Review and approve the one-day testnet transaction in your wallet.");
+  const result = await walletClient.createEntity({
+    payload: jsonToPayload({
+      record_kind: "protocol_integration_demo_proof",
+      project: "JalChhaya",
+      synthetic_demo: true,
+      notice: "Synthetic protocol integration proof only. Not a real relief facility, availability observation, or municipal report.",
+      created_at: createdAt,
+    }),
+    contentType: "application/json",
+    attributes: {
+      project_id: str(PROJECT_ID),
+      entity_type: str("submission_demo_proof"),
+      synthetic_demo: str("true"),
+      creator_wallet: str(accountAddress.toLowerCase()),
+    },
+    expires: ExpirationTime.fromDays(1),
+  });
+
+  onStatusUpdate?.("broadcasting", result.txHash, "Synthetic proof transaction submitted; waiting for Arkiv indexing…");
+  onStatusUpdate?.("querying_arkiv", result.txHash, "Verifying the created entity directly through Arkiv RPC…");
+
+  let verified = false;
+  for (const delayMs of [0, 1000, 2000, 4000]) {
+    if (delayMs) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    try {
+      const entity = await arkivPublicClient.getEntity(result.entityKey as `0x${string}`);
+      if (entity) {
+        verified = true;
+        break;
+      }
+    } catch {
+      // Indexers can lag behind transaction inclusion; retry briefly, then label pending.
+    }
+  }
+
+  onStatusUpdate?.(
+    verified ? "confirmed" : "confirming",
+    result.txHash,
+    verified
+      ? `Synthetic entity verified on Arkiv. It expires after one day. Entity key: ${result.entityKey}`
+      : `Transaction broadcast, but Arkiv entity lookup is still pending. Do not describe it as verified yet. Entity key: ${result.entityKey}`
+  );
+  return { ...result, verified };
+}
 
 /**
  * Publish Availability Observation with real wallet state machine and post-tx verification

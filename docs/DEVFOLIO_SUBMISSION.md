@@ -12,8 +12,9 @@
 **HTTP RPC**: `https://rpc.tiramisu.db-chain.testnet.arkiv.network`  
 **WebSocket RPC**: `wss://rpc.tiramisu.db-chain.testnet.arkiv.network`  
 **Tiramisu Block Explorer**: `https://tiramisu.explorer.arkiv.network`  
-**Dedicated Creator Wallet**: `0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279`  
-**Independent Attester Wallet**: `0x5b52b2516184Cc635D1A1Bc410697E3a070aa471`  
+**Synthetic fixture publisher identifier (not a live-write claim)**: `0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279`<br>
+**Fixture attester identifier (synthetic data)**: `0x5b52b2516184Cc635D1A1Bc410697E3a070aa471`<br>
+**Approved submission-proof wallet**: `0x4064bb37D501fb65d89edC7d454900D2De0Dc0d1` (one-day synthetic record pending test GLM and wallet approval)<br>
 
 ---
 
@@ -76,9 +77,9 @@ JalChhaya implements a privacy-minimizing design aligned with data-minimization 
 
 ## 5. Technical Rigor & Testing
 
-- **Test Suite**: 54 unit tests across 6 test suites with **93.33% statement coverage**, **75.78% function coverage**, and **81.66% branch coverage** using Vitest and `@vitest/coverage-v8`.
+- **Test Suite**: 73 unit tests across 8 test suites with **93.61% statement coverage**, **78.30% function coverage**, and **82.73% branch coverage** using Vitest and `@vitest/coverage-v8`.
 - **Accessibility**: Automated Axe WCAG 2.2 AA audits (landing, evidence drawer, modals) and keyboard traversal across 7 viewports (320px–1920px), reporting zero critical or serious Axe violations (automated scans, not certified screen-reader testing).
-- **Responsiveness & Offline**: 63/63 Playwright E2E tests passing with zero horizontal overflow verified across 320px, 360px, 390px, 768px, 1024px, 1440px, and 1920px viewports, including service-worker offline reading.
+- **Responsiveness & Offline**: 70/70 Playwright E2E tests passing with zero horizontal overflow verified across 320px, 360px, 390px, 768px, 1024px, 1440px, and 1920px viewports, including synthetic-proof dialog accessibility and service-worker offline reading.
 - **Trilingual Localization**: Native support for Marathi (मराठी), Hindi (हिंदी), and English.
 - **Security**: Comprehensive secret scanner verifying full Git commit history, git-tracked files, and production dist bundle for zero leaked credentials or private keys, plus zero high/critical vulnerabilities in `npm audit`.
-- **On-Chain Verification State**: Live Tiramisu RPC connection and Chain ID `7738577` strictly verified at block `#734712`. Live entity broadcast gated on testnet faucet funding due to unauthenticated RPC query limits (`ANON_COST_LIMITED`). Transparent machine-readable evidence artifact maintained in `docs/live_evidence.json`.
+- **On-Chain Verification State**: Live Tiramisu RPC connection and Chain ID `7738577` strictly verified at block `#739722`. The unauthenticated project query returned `ANON_COST_LIMITED`; no live relief entity or synthetic proof is claimed. The approved proof wallet needs test GLM and a user-approved wallet signature. Current machine-readable evidence is in `docs/live_evidence.json`.

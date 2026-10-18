@@ -26,6 +26,7 @@ interface EvidenceArtifact {
   wallets: {
     creator: string;
     attester: string;
+    submissionProof: string;
   };
   statuses: VerificationStatuses;
   entities: ValidatedEntitiesReport;
@@ -62,6 +63,7 @@ async function verifyOnchain() {
   const wallets = {
     creator: "0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279",
     attester: "0x5b52b2516184Cc635D1A1Bc410697E3a070aa471",
+    submissionProof: "0x4064bb37D501fb65d89edC7d454900D2De0Dc0d1",
   };
 
   function writeEvidence(
@@ -76,7 +78,7 @@ async function verifyOnchain() {
         chainName: "Arkiv Tiramisu Testnet",
         rpcUrl,
         wsUrl: "wss://rpc.tiramisu.db-chain.testnet.arkiv.network",
-        explorerUrl: "https://explorer.tiramisu.db-chain.testnet.arkiv.network",
+        explorerUrl: "https://tiramisu.explorer.arkiv.network",
         verifiedBlockHeight: blockHeight,
         verifiedAt: new Date().toISOString(),
       },

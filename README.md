@@ -132,7 +132,7 @@ sequenceDiagram
 
 We believe in complete, unembellished transparency:
 
-1. **RPC & Chain ID**: Strictly verified on-chain at block `#736045` on Arkiv Tiramisu (Chain ID `7738577`), as recorded in [`docs/live_evidence.json`](./docs/live_evidence.json).
+1. **RPC & Chain ID**: Strictly verified on Arkiv Tiramisu at block `#739722` (Chain ID `7738577`); the current public project query returns `ANON_COST_LIMITED`, as recorded in [`docs/live_evidence.json`](./docs/live_evidence.json).
 2. **Rate Limits & Faucet Status**: Public unauthenticated queries to the testnet RPC enforce an `ANON_COST_LIMITED` budget cap. Our live verifier (`scripts/verify-onchain.ts`) detects this cleanly.
 3. **Live Entity Seeding**: Broadcast of canonical live on-chain entities is preserved as an active gating check that will complete once testnet wallets (`0x8Bcb...0279` and `0x5b52...a471`) receive testnet gas from the official faucet.
 4. **Demonstration Baseline**: While testnet wallets await faucet funds, the application renders clearly labeled deterministic demonstration fixtures for Pune (`swargate`, `shivajinagar`, `hadapsar`, `kothrud`, `vimannagar`). Every card displays its source origin.
@@ -147,14 +147,14 @@ All quality gates run locally and on GitHub Actions CI. Every gate must pass wit
 | Quality Gate | Command | Scope & Configuration | Verified Result | Status |
 |---|---|---|---|---|
 | **TypeScript Typecheck** | `npm run typecheck` | `tsc --noEmit` with strict null checks | **0 errors** | ✅ PASS |
-| **Unit Test Suite** | `npm test` | Vitest: 66 tests across 7 test suites (App, components, schemas, security scanner, SDK service, verifier) | **66/66 passed** (93.73% Stmts, 82.86% Branches, 76.76% Funcs) | ✅ PASS |
-| **E2E & Accessibility** | `npm run test:e2e` | Playwright: 63 tests across 7 viewports (320, 360, 390, 768, 1024, 1440, 1920 px), automated Axe WCAG 2.2 AA checks, keyboard navigation | **63/63 passed** (0 critical / serious Axe violations) | ✅ PASS |
+| **Unit Test Suite** | `npm test` | Vitest: 73 tests across 8 test suites (App, components, schemas, security scanner, SDK service, verifier, proof flow) | **73/73 passed** (93.61% Stmts, 82.73% Branches, 78.30% Funcs) | ✅ PASS |
+| **E2E & Accessibility** | `npm run test:e2e` | Playwright: 70 tests across 7 viewports (320, 360, 390, 768, 1024, 1440, 1920 px), automated Axe WCAG 2.2 AA checks, keyboard navigation | **70/70 passed** (0 critical / serious Axe violations) | ✅ PASS |
 | **Service Worker E2E** | `tests/e2e/accessibility.spec.ts` | Strict `navigator.serviceWorker.ready` verification, correct origin scope, active worker state | **Verified active & controlling** | ✅ PASS |
 | **Offline Recovery E2E** | `tests/e2e/accessibility.spec.ts` | Online warming, service worker controller readiness, offline browser reload, offline banner display, write rejection test | **Verified offline recovery & write rejection** | ✅ PASS |
 | **Security Scan** | `npm run security-scan` | Commit-by-commit Git history stream (shallow-clone check enforced; `fetch-depth: 0` in CI), unignored working tree files, sensitive filename inspection, client bundle leak scan | **0 secrets detected across 7 commits & 64 files** | ✅ PASS |
 | **Dependency Audit** | `npm run audit` | `npm audit --omit=dev --audit-level=high` | **0 high or critical vulnerabilities** | ✅ PASS |
 | **Production Build** | `npm run build` | `vite build` production compilation, zero source map leaks | **Clean optimized build (`dist/`)** | ✅ PASS |
-| **Live On-Chain Verifier** | `npm run verify-onchain` | Live RPC reachability, chain ID `7738577`, compound multi-predicate query check | **Verified block #736045; entity broadcast pending faucet gas (`ANON_COST_LIMITED`)** | ⚠️ GATE ACTIVE |
+| **Live On-Chain Verifier** | `npm run verify-onchain` | Live RPC reachability, chain ID `7738577`, compound multi-predicate query check | **Block #739722 and chain ID verified; project query rate-limited; live proof awaits test GLM and wallet approval** | ⚠️ GATE ACTIVE |
 
 ---
 
@@ -207,9 +207,12 @@ The application will be accessible at `http://localhost:5173/`.
 | **WebSocket Endpoint** | `wss://rpc.tiramisu.db-chain.testnet.arkiv.network` |
 | **Block Explorer** | [tiramisu.explorer.arkiv.network](https://tiramisu.explorer.arkiv.network) |
 | **Official Faucet** | [hub.arkiv.network/faucet](https://hub.arkiv.network/faucet) |
-| **Dedicated Creator Wallet** | `0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279` |
-| **Independent Attester Wallet** | `0x5b52b2516184Cc635D1A1Bc410697E3a070aa471` |
+| **Synthetic fixture publisher identifier (not a live-write claim)** | `0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279` |
+| **Approved submission-proof wallet** | `0x4064bb37D501fb65d89edC7d454900D2De0Dc0d1` |
+| **Fixture attester identifier (synthetic data)** | `0x5b52b2516184Cc635D1A1Bc410697E3a070aa471` |
 | **Live Web App URL** | [abhijeetnardele24-hash.github.io/jalchhaya](https://abhijeetnardele24-hash.github.io/jalchhaya/) |
+
+The app includes an optional **synthetic protocol proof** flow. It is locked to the approved wallet above, checks the Tiramisu network and test-token balance, asks MetaMask to review the transaction, writes no civic location/status, and sets the record to expire after one day. A live proof is **not claimed until the entity is found through Arkiv RPC**. This wallet currently needs free test GLM from the [official faucet](https://hub.arkiv.network/faucet); never share a recovery phrase or private key.
 
 ---
 

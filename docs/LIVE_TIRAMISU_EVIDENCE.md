@@ -4,12 +4,13 @@
 **Evaluation Target**: Pre-Devcon Arkiv Global Tour Stop  
 **Target Category**: Best Indian Use Case (Pune Outdoor Heat Relief)  
 **Canonical Project ID**: `jalchhaya-pune-2026`  
-**Target Chain**: Arkiv Tiramisu Testnet (`Chain ID: 7738577`, `0x761591`)  
+**Target Chain**: Arkiv Tiramisu Testnet (`Chain ID: 7738577`, `0x7614d1`)
 **RPC Endpoint**: `https://rpc.tiramisu.db-chain.testnet.arkiv.network`  
 **WebSocket Endpoint**: `wss://rpc.tiramisu.db-chain.testnet.arkiv.network`  
-**Block Explorer**: `https://explorer.tiramisu.db-chain.testnet.arkiv.network`  
+**Block Explorer**: `https://tiramisu.explorer.arkiv.network`<br>
 **Primary Creator Wallet**: `0x8Bcb4c38150DdFfA0572d0Daf21eDC82B9A20279`  
 **Independent Attester Wallet**: `0x5b52b2516184Cc635D1A1Bc410697E3a070aa471`  
+**Approved Submission-Proof Wallet**: `0x4064bb37D501fb65d89edC7d454900D2De0Dc0d1` (synthetic record not yet broadcast; funding required)
 
 ---
 
@@ -22,7 +23,7 @@ Running `npm run verify-onchain` executes strict, automated on-chain verificatio
       JalChhaya: Arkiv Tiramisu Strict On-Chain Verification      
 ==================================================================
 [CHECK 1/4] Connecting to RPC endpoint: https://rpc.tiramisu.db-chain.testnet.arkiv.network
-  [PASS] RPC is reachable. Current Live Block Height: #734712
+  [PASS] RPC is reachable. Current Live Block Height: #739722
 [CHECK 2/4] Validating Chain ID...
   [PASS] Chain ID verified: 7738577 (Arkiv Tiramisu Testnet)
 [CHECK 3/4] Querying on-chain entities for project: 'jalchhaya-pune-2026' (with full attributes)...
@@ -58,8 +59,8 @@ The verifier records the current network state, verified wallets, and distinct v
     "chainName": "Arkiv Tiramisu Testnet",
     "rpcUrl": "https://rpc.tiramisu.db-chain.testnet.arkiv.network",
     "wsUrl": "wss://rpc.tiramisu.db-chain.testnet.arkiv.network",
-    "explorerUrl": "https://explorer.tiramisu.db-chain.testnet.arkiv.network",
-    "verifiedBlockHeight": "734712"
+    "explorerUrl": "https://tiramisu.explorer.arkiv.network",
+    "verifiedBlockHeight": "739722"
   },
   "projectId": "jalchhaya-pune-2026",
   "wallets": {

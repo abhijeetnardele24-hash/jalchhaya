@@ -14,7 +14,7 @@ import {
   TIRAMISU_EXPLORER,
 } from "./lib/arkivService";
 import { INITIAL_SYNTHETIC_POINTS, INITIAL_SYNTHETIC_INCIDENTS } from "./lib/mockData";
-import { MapPin, ListFilter, PlusCircle, ExternalLink } from "lucide-react";
+import { MapPin, ListFilter, PlusCircle, ExternalLink, ShieldCheck } from "lucide-react";
 
 // Lazy-loaded modals and drawer for code splitting and lightweight initial reader bundle
 const EvidenceInspector = lazy(() =>
@@ -25,6 +25,9 @@ const ObservationModal = lazy(() =>
 );
 const AttestationModal = lazy(() =>
   import("./components/AttestationModal").then((m) => ({ default: m.AttestationModal }))
+);
+const SubmissionProofModal = lazy(() =>
+  import("./components/SubmissionProofModal").then((m) => ({ default: m.SubmissionProofModal }))
 );
 
 export const App: React.FC = () => {
@@ -64,6 +67,7 @@ export const App: React.FC = () => {
   const [reportingPoint, setReportingPoint] = useState<ReliefPoint | null>(null);
   const [attestingPoint, setAttestingPoint] = useState<ReliefPoint | null>(null);
   const [inspectingPoint, setInspectingPoint] = useState<ReliefPoint | null>(null);
+  const [submissionProofOpen, setSubmissionProofOpen] = useState(false);
 
   // Subscribe to Connection State changes
   useEffect(() => {
@@ -357,6 +361,21 @@ export const App: React.FC = () => {
         }}
       >
         <div className="container" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <section
+            aria-labelledby="submission-proof-heading"
+            style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", padding: "1rem 1.125rem", border: "1px solid var(--c-border)", borderRadius: 8, background: "var(--c-paper)", boxShadow: "var(--shadow-subtle)" }}
+          >
+            <div style={{ display: "flex", alignItems: "flex-start", gap: ".75rem", maxWidth: 700 }}>
+              <span aria-hidden="true" style={{ display: "grid", placeItems: "center", width: 38, height: 38, flex: "0 0 auto", borderRadius: 8, background: "var(--c-water-subtle)", color: "var(--c-monsoon)" }}><ShieldCheck size={20} /></span>
+              <div>
+                <h2 id="submission-proof-heading" style={{ fontSize: ".875rem", color: "var(--c-deep-ink)", fontWeight: 800 }}>Optional protocol proof · synthetic only</h2>
+                <p style={{ fontSize: ".78rem", color: "var(--c-text-secondary)", marginTop: ".15rem" }}>Demonstrates one real Arkiv testnet write without creating or implying a real civic availability report. The record expires after one day.</p>
+              </div>
+            </div>
+            <button type="button" className="btn-secondary" onClick={() => setSubmissionProofOpen(true)} aria-haspopup="dialog" style={{ whiteSpace: "nowrap" }}>
+              <ShieldCheck size={15} aria-hidden="true" /> Open proof flow
+            </button>
+          </section>
           <div
             style={{
               display: "flex",
@@ -482,6 +501,11 @@ export const App: React.FC = () => {
             locale={locale}
           />
         )}
+        <SubmissionProofModal
+          isOpen={submissionProofOpen}
+          onClose={() => setSubmissionProofOpen(false)}
+          walletAddress={walletAddress}
+        />
       </Suspense>
     </div>
   );

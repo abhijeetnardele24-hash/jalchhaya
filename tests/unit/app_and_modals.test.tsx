@@ -100,6 +100,10 @@ describe("App and Modals Comprehensive Test Suite", () => {
       const disconnectBtn = screen.getByText("Disconnect");
       fireEvent.click(disconnectBtn);
       expect(screen.getByText("Connect Wallet to Report")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /Open proof flow/ }));
+      expect(await screen.findByRole("dialog", { name: /Create a synthetic testnet record/ })).toBeInTheDocument();
+      expect(screen.getByText(/Connect the required wallet/)).toBeInTheDocument();
     });
 
     it("opens and handles Observation and Attestation modals from App flow", async () => {
