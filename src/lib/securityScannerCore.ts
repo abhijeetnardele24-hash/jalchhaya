@@ -105,3 +105,13 @@ export function scanBundleFiles(
 
   return violations;
 }
+
+/**
+ * Ensures full-history scan cannot proceed erroneously on shallow git clones.
+ */
+export function validateRepositoryCloning(isShallow: boolean): string | null {
+  if (isShallow) {
+    return "Repository clone is shallow (git rev-parse --is-shallow-repository is true). Full-history scanning cannot be claimed or verified on shallow history. Ensure 'fetch-depth: 0' is configured in CI.";
+  }
+  return null;
+}

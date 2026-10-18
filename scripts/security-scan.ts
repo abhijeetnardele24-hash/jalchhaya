@@ -6,6 +6,7 @@ import {
   scanTextForSecrets,
   checkSensitiveFilename,
   scanBundleFiles,
+  validateRepositoryCloning,
 } from "../src/lib/securityScannerCore";
 
 // Comprehensive Secret Scanner for JalChhaya
@@ -27,6 +28,16 @@ let filesScannedCount = 0;
 // 1. Scan entire git commit history (robust commit-by-commit streaming)
 console.log("🔍 [1/4] Scanning full Git commit history (streaming all commits)...");
 try {
+  const isShallow = execSync("git rev-parse --is-shallow-repository", {
+    cwd: rootDir,
+    encoding: "utf8",
+  }).trim() === "true";
+
+  const shallowViolation = validateRepositoryCloning(isShallow);
+  if (shallowViolation) {
+    violations.push(shallowViolation);
+  }
+
   const revListOutput = execSync("git rev-list --all", {
     cwd: rootDir,
     encoding: "utf8",

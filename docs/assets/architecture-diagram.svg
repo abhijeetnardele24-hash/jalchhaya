@@ -145,7 +145,7 @@
   <!-- Network Endpoints -->
   <rect x="642" y="364" width="278" height="75" class="box-arkiv" style="border: 1px dashed #7AD1DC;" />
   <text x="654" y="384" class="txt-arkiv">Tiramisu Testnet Gateway</text>
-  <text x="654" y="399" class="txt-arkiv-sub">JSON-RPC: https://rpc.tiramisu... (Block #735005)</text>
+  <text x="654" y="399" class="txt-arkiv-sub">JSON-RPC: https://rpc.tiramisu... (Block #736045)</text>
   <text x="654" y="412" class="txt-arkiv-sub">WebSocket: wss://rpc.tiramisu... (Live events)</text>
   <text x="654" y="425" class="txt-arkiv-sub">Explorer: https://explorer.tiramisu...</text>
 

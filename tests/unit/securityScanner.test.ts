@@ -3,6 +3,7 @@ import {
   scanTextForSecrets,
   checkSensitiveFilename,
   scanBundleFiles,
+  validateRepositoryCloning,
 } from "../../src/lib/securityScannerCore";
 
 describe("Security Scanner Engine", () => {
@@ -105,6 +106,20 @@ describe("Security Scanner Engine", () => {
       ];
       const violations = scanBundleFiles(files);
       expect(violations).toEqual([]);
+    });
+  });
+
+  describe("validateRepositoryCloning", () => {
+    it("returns an error if repository clone is shallow", () => {
+      const error = validateRepositoryCloning(true);
+      expect(error).not.toBeNull();
+      expect(error).toContain("Repository clone is shallow");
+      expect(error).toContain("fetch-depth: 0");
+    });
+
+    it("returns null if repository clone is full (non-shallow)", () => {
+      const error = validateRepositoryCloning(false);
+      expect(error).toBeNull();
     });
   });
 });
