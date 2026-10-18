@@ -116,4 +116,4 @@ JalChhaya executes all queries directly via `@arkiv-network/sdk`:
 ## 6. Accessibility & Localization
 
 - **Trilingual Support**: Instant toggling between English, Marathi (मराठी), and Hindi (हिंदी).
-- **Accessibility Verification**: Automated WCAG checks plus documented manual keyboard and screen-reader verification. Calibrated color tokens, visible focus rings, ARIA roles, live regions for WebSocket feeds, and touch targets >= 44x44px for field workers wearing riding gloves.
+- **Accessibility Verification**: Automated Axe WCAG 2.2 AA checks integrated into the Playwright test suite across all 7 supported viewports (320px–1920px). Features calibrated high-contrast color tokens, visible focus rings, semantic ARIA roles, live regions for state updates, and touch targets >= 44x44px for field workers wearing riding gloves. (Note: formal manual testing with specific screen-reading assistive technologies like NVDA/TalkBack remains uncertified).

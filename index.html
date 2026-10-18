@@ -17,9 +17,14 @@
     <script type="module" src="/src/main.tsx"></script>
     <script>
       if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
-        window.addEventListener('load', () => {
+        const registerSW = () => {
           navigator.serviceWorker.register('./sw.js').catch(() => {});
-        });
+        };
+        if (document.readyState === 'complete') {
+          registerSW();
+        } else {
+          window.addEventListener('load', registerSW);
+        }
       }
     </script>
   </body>

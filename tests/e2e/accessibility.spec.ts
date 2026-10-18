@@ -156,58 +156,111 @@ test.describe("JalChhaya WCAG 2.2 AA Accessibility & Responsiveness", () => {
     await expect(page.locator("body")).toContainText(/Demonstration Scenario|Live Verified Mode/);
   });
 
-  test("supports offline read behavior and prevents offline writes to Arkiv", async ({ page, context }) => {
+  test("supports offline reload recovery and prevents offline writes to Arkiv", async ({ page, context }) => {
+    test.setTimeout(60000);
+
+    // 1. Initial online load & warm cache
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // Ensure initial directory loaded
-    await expect(page.getByText("Deccan PMT Bus Terminal Water Kiosk")).toBeVisible();
+    // Ensure service worker is registered and controlling clients
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller) {
+        await new Promise((resolve) => {
+          navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true });
+          if (navigator.serviceWorker.controller) resolve(true);
+        });
+      }
+    });
 
-    // Open observation modal while online to ensure lazy component is in memory
+    // Reload once while online through the controlling service worker to populate cache
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(300);
+
+    // Warm lazy modals into memory and cache while online
     const reportBtn = page.getByRole("button", { name: "Update Status" }).first();
     await reportBtn.click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
+    const obsDialog = page.getByRole("dialog");
+    await expect(obsDialog).toBeVisible();
+    await obsDialog.getByRole("button", { name: "Close Modal" }).click({ force: true });
+    await expect(obsDialog).not.toBeVisible();
 
-    // Emulate offline network condition
-    await context.setOffline(true);
-    await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+    const attestBtn = page.getByRole("button", { name: /Confirm \/ Challenge/i }).first();
+    await attestBtn.click();
+    const attestDialog = page.getByRole("dialog");
+    await expect(attestDialog).toBeVisible();
+    await attestDialog.getByRole("button", { name: "Close Modal" }).click({ force: true });
+    await expect(attestDialog).not.toBeVisible();
 
-    // Attempt to submit write while offline
-    const submitBtn = dialog.locator('button[type="submit"]');
-    await submitBtn.click();
+    try {
+      // 2. Switch browser offline
+      await context.setOffline(true);
+      await page.evaluate(() => window.dispatchEvent(new Event("offline")));
 
-    // Verify that an explicit error prevents write and confirms offline restriction
-    await expect(page.getByText(/Cannot broadcast while offline/i)).toBeVisible();
+      // 3. Test genuine offline reload & service-worker cache recovery
+      await page.reload({ waitUntil: "domcontentloaded" });
 
-    // Close modal
-    await page.keyboard.press("Escape");
-    await expect(dialog).not.toBeVisible();
+      // Confirm app shell and cached directory recover with visible offline/degraded badge
+      const offlineIndicator = page.getByTestId("offline-indicator");
+      await expect(offlineIndicator).toBeVisible({ timeout: 10000 });
+      await expect(offlineIndicator).toContainText("Offline Mode");
 
-    // Verify visible offline notice in header
-    const offlineIndicator = page.getByTestId("offline-indicator");
-    await expect(offlineIndicator).toBeVisible();
-    await expect(offlineIndicator).toContainText("Offline Mode");
+      // Verify cached relief facilities remain readable
+      await expect(page.getByText("Deccan PMT Bus Terminal Water Kiosk")).toBeVisible();
 
-    // Verify relief facilities remain readable in offline mode
-    await expect(page.getByText("Deccan PMT Bus Terminal Water Kiosk")).toBeVisible();
+      // 4. Verify observation write is blocked while offline
+      await page.getByRole("button", { name: "Update Status" }).first().click();
+      const offlineObsDialog = page.getByRole("dialog");
+      await expect(offlineObsDialog).toBeVisible();
+      await offlineObsDialog.locator('button[type="submit"]').click();
+      await expect(offlineObsDialog.getByText(/Cannot broadcast while offline/i)).toBeVisible();
+      await offlineObsDialog.getByRole("button", { name: /Cancel/i }).click();
+      await expect(offlineObsDialog).not.toBeVisible();
 
-    // Restore network
-    await context.setOffline(false);
-    await page.evaluate(() => window.dispatchEvent(new Event("online")));
-    await expect(page.getByTestId("offline-indicator")).not.toBeVisible();
+      // 5. Verify attestation write is blocked while offline
+      await page.getByRole("button", { name: /Confirm \/ Challenge/i }).first().click();
+      const offlineAttestDialog = page.getByRole("dialog");
+      await expect(offlineAttestDialog).toBeVisible();
+      await offlineAttestDialog.locator('button[type="submit"]').click();
+      await expect(offlineAttestDialog.getByText(/Cannot attest while offline/i)).toBeVisible();
+      await offlineAttestDialog.getByRole("button", { name: /Cancel/i }).click();
+      await expect(offlineAttestDialog).not.toBeVisible();
+    } finally {
+      // 6. Mandatory cleanup: Always restore online state so subsequent tests are not contaminated
+      try {
+        await context.setOffline(false);
+        await page.evaluate(() => window.dispatchEvent(new Event("online"))).catch(() => {});
+      } catch {
+        // Ignore if page/context was already closed by runner
+      }
+    }
   });
 
   test("registers service worker for offline asset caching", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // Check service worker registration in browser
-    const hasServiceWorker = await page.evaluate(async () => {
-      if (!("serviceWorker" in navigator)) return false;
-      const regs = await navigator.serviceWorker.getRegistrations();
-      return regs.length >= 0; // service worker API is present and operational
+    // Wait for real service worker registration to be ready
+    const swInfo = await page.evaluate(async () => {
+      if (!("serviceWorker" in navigator)) return null;
+      const reg = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+      ]);
+      if (!reg) return null;
+      return {
+        hasRegistration: true,
+        scope: reg.scope,
+        activeScriptURL: reg.active?.scriptURL || null,
+        activeState: reg.active?.state || null,
+      };
     });
-    expect(hasServiceWorker).toBe(true);
+
+    expect(swInfo).not.toBeNull();
+    expect(swInfo?.hasRegistration).toBe(true);
+    expect(swInfo?.activeScriptURL).toContain("sw.js");
+    expect(swInfo?.activeState).toBe("activated");
+    expect(swInfo?.scope).toBe(new URL("./", page.url()).href);
   });
 });

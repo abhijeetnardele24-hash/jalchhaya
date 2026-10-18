@@ -307,6 +307,18 @@ export const INITIAL_SYNTHETIC_ATTESTATIONS: Attestation[] = [
   },
 ];
 
+// Attach synthetic observations and attestations to initial demo points
+INITIAL_SYNTHETIC_POINTS.forEach((point) => {
+  const obs = INITIAL_SYNTHETIC_OBSERVATIONS.find((o) => o.reliefPointKey === point.key);
+  if (obs) {
+    point.latestObservation = obs;
+  }
+  const atts = INITIAL_SYNTHETIC_ATTESTATIONS.filter((a) => a.reliefPointKey === point.key);
+  if (atts.length > 0) {
+    point.attestations = atts;
+  }
+});
+
 export const INITIAL_SYNTHETIC_INCIDENTS: Incident[] = [
   {
     key: "0x9999999999999999999999999999999999999999999999999999999999999901",

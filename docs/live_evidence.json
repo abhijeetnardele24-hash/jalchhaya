@@ -5,8 +5,8 @@
     "rpcUrl": "https://rpc.tiramisu.db-chain.testnet.arkiv.network",
     "wsUrl": "wss://rpc.tiramisu.db-chain.testnet.arkiv.network",
     "explorerUrl": "https://explorer.tiramisu.db-chain.testnet.arkiv.network",
-    "verifiedBlockHeight": "735005",
-    "verifiedAt": "2026-10-18T10:35:45.279Z"
+    "verifiedBlockHeight": "736045",
+    "verifiedAt": "2026-10-18T11:10:26.614Z"
   },
   "projectId": "jalchhaya-pune-2026",
   "wallets": {

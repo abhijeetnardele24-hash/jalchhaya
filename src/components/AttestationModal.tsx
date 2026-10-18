@@ -114,6 +114,8 @@ export const AttestationModal: React.FC<AttestationModalProps> = ({
         style={{
           width: "100%",
           maxWidth: "500px",
+          maxHeight: "90vh",
+          overflowY: "auto",
           padding: "1.5rem",
           display: "flex",
           flexDirection: "column",
